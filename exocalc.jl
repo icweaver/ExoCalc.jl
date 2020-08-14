@@ -211,13 +211,13 @@ studies = [
 		Rₛ	 = (1.1517600 ± 0.0596583)u"Rsun",
 		ρₛ = (0.99471000 ± 0.23240140)u"g/cm^3",
 		Mₛ = (1.078000 ± 0.136618)u"Msun",
-		#Lₛ = (10.0^(0.1661873 ± 0.0191600))u"Lsun",
+		Lₛ = (10.0^(0.1661873 ± 0.0191600))u"Lsun",
 		gₛ = (10.0^(4.3479600 ± 0.0819789))u"cm/s^2",
 	),
 ];
 
 # ╔═╡ a8df7ad0-dd9e-11ea-2a6a-f16683371016
-md"### Structure used to hold a summary of all input and derived params"
+md"### Structure used to hold a summary of all inputs and derived params"
 
 # ╔═╡ bd752a9e-dd80-11ea-141c-779c5135d4d8
 @with_kw_noshow struct Derived @deftype Union{Nothing, Quantity}
@@ -241,7 +241,7 @@ md"### Structure used to hold a summary of all input and derived params"
 	RₚRₛ::Union{Measurement, Nothing} = nothing
 	inputs_RₚRₛ::Union{String, Nothing} = nothing
 	P	= nothing
-	inputs_P::Union{String, Nothing} = nothing
+	inputs_P::String = "given"
 	aRₛ::Union{Measurement, Nothing} = nothing
 	inputs_aRₛ::Union{String, Nothing} = nothing
 	a	= nothing
@@ -284,7 +284,12 @@ begin
 			Rₛ = st.Rₛ
 			inputs_Rₛ = "given"
 			if any((!isnothing).([st.Tₛ, st.Lₛ]))
-				if isnothing(st.Tₛ)
+				if all((!isnothing).([st.Tₛ, st.Lₛ]))
+					Lₛ = st.Lₛ
+					inputs_Lₛ = "given"
+					Tₛ = st.Tₛ
+					inputs_Tₛ = "given"
+				elseif isnothing(st.Tₛ)
 					Lₛ = st.Lₛ
 					inputs_Lₛ = "given"
 					Tₛ = get_Tₛ(Lₛ=Lₛ, Rₛ=Rₛ)
@@ -456,6 +461,8 @@ begin
 			inputs_Rₛ = inputs_Rₛ,
 			Tₛ	= Tₛ,
 			inputs_Tₛ = inputs_Tₛ,
+			Lₛ  = Lₛ,
+			inputs_Lₛ = inputs_Lₛ,
 
 			# Signal
 			n_scales = st.n_scales,
@@ -472,7 +479,8 @@ function display_summary(d::Derived)
 	**Star Params** \
 	Mₛ( $(d.inputs_Mₛ) ) = $(uconvert(u"Msun", d.Mₛ)) \
 	Rₛ( $(d.inputs_Rₛ) ) = $(uconvert(u"Rsun", d.Rₛ)) \
-	Tₛ( $(d.inputs_Tₛ) ) = $(d.Tₛ)
+	Tₛ( $(d.inputs_Tₛ) ) = $(uconvert(u"K", d.Tₛ)) \
+	Lₛ( $(d.inputs_Lₛ) ) = $(uconvert(u"Lsun", d.Lₛ)) \
 	ρₛ( $(d.inputs_ρₛ) ) = $(uconvert(u"g/cm^3", d.ρₛ)) \
 	log gₛ (cm/s²)( $(d.inputs_gₛ) ) = $(log10(ustrip(uconvert(u"cm/s^2", d.gₛ))))
 	
@@ -480,7 +488,7 @@ function display_summary(d::Derived)
 	K( $(d.inputs_K) ) = $(uconvert(u"m/s", d.K)) \
 	i( $(d.inputs_i) ) = $(uconvert(u"°", d.i))
 	RₚRₛ( $(d.inputs_RₚRₛ) ) = $(uconvert(NoUnits, d.RₚRₛ)) \
-	aRₛ( $(d.inputs_aRₛ) ) = $(uconvert(NoUnits, d.aRₛ))
+	aRₛ( $(d.inputs_aRₛ) ) = $(uconvert(NoUnits, d.aRₛ)) \
 	P( $(d.inputs_P) ) = $(uconvert(u"d", d.P)) \
 	b( $(d.inputs_b) ) = $(d.b)
 
