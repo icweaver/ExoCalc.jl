@@ -35,7 +35,7 @@ md"### How parameters were calculated"
 md"""
 This first checks if there are missing input parameters and then calls the appropriate function to calculate them for each study. The resulting derived parameters are then calculated from them.
 
-Everything was done with a "star first" approach, meaning that all stellar parameters were determined first, and the the planet parameters were determined self-consistently from that. If conflicting parameters are given, the calculator will try to give priority to direct observables and error otherwise. 
+Everything was done with a "star first" approach, meaning that all stellar parameters were determined first, and then the planet parameters were determined self-consistently from that. If conflicting parameters are given, the calculator will try to give priority to direct observables and error otherwise. 
 """
 
 # ╔═╡ 49f75dea-dda0-11ea-1a85-bbdd4750b878
@@ -58,6 +58,9 @@ begin
 	
 	# Semi-major axis
 	get_a(; aRₛ, Rₛ) = aRₛ * Rₛ
+	
+	# Impact parameter
+	get_b(; i, aRₛ) = aRₛ * cos(i)
 
 	# Star density
 	get_ρₛ(P::Unitful.Time, aRₛ::Measurement) = (3.0π / (G * P^2)) * aRₛ^3
@@ -112,6 +115,7 @@ md"### Structure used to hold the possible input parameters used by a study"
 	RₚRₛ::Union{Measurement, Nothing} = nothing # Planet to star radius ratio
 	aRₛ::Union{Measurement, Nothing} = nothing	# Semi-major axis to star radius ratio
 	a::Union{Measurement, Nothing} = nothing	# Semi-major axis
+	b::Union{Measurement, Nothing} = nothing	# Impact parameter
 	P = nothing									# Period
 	K = nothing									# RV semi-amplitude
 	i = nothing									# Inclination
@@ -158,13 +162,25 @@ studies = [
 		aRₛ  = (4.5459 ± 0.0919),
 	),
 	Study(
-		name = "HAT-P-23/b: Stassun et al. (2017, GAIA DR1)",
+		name = "HAT-P-23/b: Sada & Ramón-Fox (2016)",
 		μ	 = 2.0*amu,
 		α	 = 0.0 ± 0.0,
 		K	 = (346.0 ± 21)u"m/s", # latest RV data, from B17
 		i	 = (85.1 ± 1.5)u"°",  # latest RV data, from B17
 		P	 = (1.212880 ± 0.000002)u"d", # latest transit data: (S&R16)
 		RₚRₛ = 0.1113 ± 0.0010, # latest transit data: (S&R16)
+		Tₛ	 = (5905.0 ± 80.0)u"K",
+		Rₛ	 = (0.960±0.200)u"Rsun",
+		aRₛ  = 4.26 ± 0.14,
+	),
+	Study(
+		name = "HAT-P-23/b: Stassun et al. (2017, GAIA DR1)",
+		μ	 = 2.0*amu,
+		α	 = 0.0 ± 0.0,
+		K	 = (346.0 ± 21)u"m/s", # latest RV data, from B17
+		i	 = (85.1 ± 1.5)u"°",  # latest RV data, from B17
+		P	 = (1.212880 ± 0.000002)u"d",
+		RₚRₛ = 0.1113 ± 0.0010,
 		Tₛ	 = (5905.0 ± 80.0)u"K",
 		ρₛ	 = (0.92 ± 0.18)u"g/cm^3",
 		Rₛ	 = (0.960±0.200)u"Rsun",
@@ -206,6 +222,21 @@ md"### Structure used to hold a summary of all input and derived params"
 # ╔═╡ bd752a9e-dd80-11ea-141c-779c5135d4d8
 @with_kw_noshow struct Derived @deftype Union{Nothing, Quantity}
 	name::String = "Custom"
+	
+	# Star Params
+	ρₛ	= nothing
+	inputs_ρₛ::Union{String, Nothing} = nothing
+	gₛ	= nothing
+	inputs_gₛ::Union{String, Nothing} = nothing
+	Mₛ	= nothing
+	inputs_Mₛ::Union{String, Nothing} = nothing
+	Rₛ	= nothing
+	inputs_Rₛ::Union{String, Nothing} = nothing
+	Tₛ	= nothing
+	inputs_Tₛ::Union{String, Nothing} = nothing
+	Lₛ	= nothing
+	inputs_Lₛ::Union{String, Nothing} = nothing
+	
 	#Orbital params
 	RₚRₛ::Union{Measurement, Nothing} = nothing
 	inputs_RₚRₛ::Union{String, Nothing} = nothing
@@ -214,12 +245,14 @@ md"### Structure used to hold a summary of all input and derived params"
 	aRₛ::Union{Measurement, Nothing} = nothing
 	inputs_aRₛ::Union{String, Nothing} = nothing
 	a	= nothing
+	b::Union{Measurement, Nothing} = nothing
+	inputs_b::Union{String, Nothing} = nothing
 	inputs_a::Union{String, Nothing} = nothing
 	K	= nothing
 	inputs_K::String = "given"
 	i	= nothing
 	inputs_i::String = "given"
-
+	
 	# Planet params
 	μ	= nothing
 	inputs_μ::String = "given"
@@ -236,19 +269,6 @@ md"### Structure used to hold a summary of all input and derived params"
 	H	= nothing
 	inputs_H::Union{String, Nothing} = nothing
 
-	# Star Params
-	ρₛ	= nothing
-	inputs_ρₛ::Union{String, Nothing} = nothing
-	gₛ	= nothing
-	inputs_gₛ::Union{String, Nothing} = nothing
-	Mₛ	= nothing
-	inputs_Mₛ::Union{String, Nothing} = nothing
-	Rₛ	= nothing
-	inputs_Rₛ::Union{String, Nothing} = nothing
-	Tₛ	= nothing
-	inputs_Tₛ::Union{String, Nothing} = nothing
-	Lₛ	= nothing
-	inputs_Lₛ::Union{String, Nothing} = nothing
 
 	# Signal
 	n_scales::Float64 = 5.0
@@ -314,7 +334,10 @@ begin
 
 		# ρₛ, aRₛ, a
 		if all((!isnothing).([st.aRₛ, st.ρₛ]))
-			error("Inconsistent inputs. Only aRₛ or ρₛ can be given.")
+			error("Conflicting inputs. Only aRₛ or ρₛ can be given.")
+		end
+		if all((!isnothing).([st.aRₛ, st.b]))
+			error("Conflicting inputs. Only aRₛ or b can be given.")
 		end
 		if !isnothing(st.ρₛ)
 			ρₛ = st.ρₛ
@@ -351,6 +374,13 @@ begin
 		end
 
 		# Calculate remaining params if not given/calculated
+		if !isnothing(st.b)
+			b = st.b
+			inputs_b = "given"
+		else
+			b = get_b(aRₛ=aRₛ, i=st.i)
+			inputs_b = "aRₛ, i"
+		end
 		if !isnothing(st.Mₚ)
 			Mₚ = st.Mₚ
 			inputs_Mₚ = "given"
@@ -398,6 +428,8 @@ begin
 			inputs_aRₛ = inputs_aRₛ,
 			K	= st.K,
 			i	= st.i,
+			b   = b,
+			inputs_b = inputs_b,
 
 			# Planet params
 			μ	= st.μ,
@@ -448,8 +480,9 @@ function display_summary(d::Derived)
 	K( $(d.inputs_K) ) = $(uconvert(u"m/s", d.K)) \
 	i( $(d.inputs_i) ) = $(uconvert(u"°", d.i))
 	RₚRₛ( $(d.inputs_RₚRₛ) ) = $(uconvert(NoUnits, d.RₚRₛ)) \
-	P( $(d.inputs_P) ) = $(uconvert(u"d", d.P)) \
 	aRₛ( $(d.inputs_aRₛ) ) = $(uconvert(NoUnits, d.aRₛ))
+	P( $(d.inputs_P) ) = $(uconvert(u"d", d.P)) \
+	b( $(d.inputs_b) ) = $(d.b)
 
 	**Planet params** \
 	μ( $(d.inputs_μ) ) = $(uconvert(u"u", d.μ)) \
