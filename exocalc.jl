@@ -35,7 +35,7 @@ md"### How parameters were calculated"
 md"""
 This first checks if there are missing input parameters and then calls the appropriate function to calculate them for each study. The resulting derived parameters are then calculated from them.
 
-Everything was done with a "star first" approach, meaning that all stellar parameters were determined first, and the the planet parameters were determined self-consistently from that.
+Everything was done with a "star first" approach, meaning that all stellar parameters were determined first, and the the planet parameters were determined self-consistently from that. If conflicting parameters are given, the calculator will try to give priority to direct observables and error otherwise. 
 """
 
 # ╔═╡ 49f75dea-dda0-11ea-1a85-bbdd4750b878
@@ -55,6 +55,9 @@ begin
 	# Semi-major axis / Star density
 	get_aRₛ(ρₛ::Unitful.Density, P::Unitful.Time) = ((G * P^2 * ρₛ)/(3.0π))^(1//3)
 	get_aRₛ(a::Unitful.Length, Rₛ::Unitful.Length) = a / Rₛ
+	
+	# Semi-major axis
+	get_a(; aRₛ, Rₛ) = aRₛ * Rₛ
 
 	# Star density
 	get_ρₛ(P::Unitful.Time, aRₛ::Measurement) = (3.0π / (G * P^2)) * aRₛ^3
@@ -62,7 +65,6 @@ begin
 
 	# Star mass
 	get_Mₛ(; ρₛ, Rₛ) = ρₛ * (4.0/3.0) * π * Rₛ^3.0
-	get_Mₛ(Lₛ) = ((Lₛ / (u"Lsun"))^0.25)u"Msun" # MS-relation
 
 	# Star luminosity
 	get_Lₛ(; Tₛ, Rₛ) = 4.0π * Rₛ^2 * σ * Tₛ^4
@@ -179,6 +181,7 @@ studies = [
 		Rₛ	 = (1.1858169 ± 0.0424133)u"Rsun",
 		Lₛ	 = (10.0^(0.13656067 ± 0.00864667))u"Lsun",
 		Mₚ	 = (1.34 ± 0.59)u"Mjup", # DR1 mass, gives inconsistent ΔD=550ppm result
+		aRₛ  = (4.26 ± 0.14), # latest transit data: (S&R16) 
 	),
 	Study(
 		name = "HAT-P-23/b: TICv8",
@@ -280,19 +283,10 @@ begin
 				Lₛ, Tₛ = st.Lₛ, st.Tₛ
 				inputs_Lₛ, inputs_Tₛ = "given", "given"
 				Rₛ = get_Rₛ(Lₛ=Lₛ, Tₛ=Tₛ)
-				inputs_Rₛ = "(st.Lₛ, st.Tₛ)"
+				inputs_Rₛ = "st.Lₛ, st.Tₛ"
 			else
-				error("Rₛ was not given. Lₛ mad Tₛ must be given then.")
+				error("Rₛ was not given. Lₛ and Tₛ must be given then.")
 			end
-		end
-
-		# Mₛ
-		if !isnothing(st.Mₛ)
-			Mₛ = st.Mₛ
-			inputs_Mₛ = "given"
-		else
-			Mₛ = get_Mₛ(Lₛ)
-			inputs_Mₛ = "Lₛ"
 		end
 
 		# RₚRₛ and Rₚ
@@ -305,9 +299,9 @@ begin
 			RₚRₛ = st.RₚRₛ
 			inputs_RₚRₛ = "given"
 			Rₚ = get_Rₚ(RₚRₛ=RₚRₛ, Rₛ=Rₛ)
-			inputs_Rₚ = "RₚRₛ, Rₛ)"
+			inputs_Rₚ = "RₚRₛ, Rₛ"
 		else
-			error("RₚRₛ or Rₚ must be given.")
+			error("Please specify either RₚRₛ or Rₚ.")
 		end
 
 		# P
@@ -318,14 +312,22 @@ begin
 			error("Please specify a period.")
 		end
 
-		# aRₛ, ρₛ
+		# ρₛ, aRₛ, a
 		if all((!isnothing).([st.aRₛ, st.ρₛ]))
 			error("Inconsistent inputs. Only aRₛ or ρₛ can be given.")
 		end
-
-		if !isnothing(st.aRₛ)
+		if !isnothing(st.ρₛ)
+			ρₛ = st.ρₛ
+			inputs_ρₛ = "given"
+			aRₛ = get_aRₛ(ρₛ, P)
+			inputs_aRₛ = "ρₛ, P"
+			a = get_a(aRₛ=aRₛ, Rₛ=Rₛ)
+			inputs_a = "aRₛ, Rₛ"
+		elseif !isnothing(st.aRₛ)
 			aRₛ = st.aRₛ
 			inputs_aRₛ = "given"
+			a = get_a(aRₛ=aRₛ, Rₛ=Rₛ)
+			inputs_a = "aRₛ, Rₛ"
 			ρₛ = get_ρₛ(P, aRₛ)
 			inputs_ρₛ = "P, aRₛ"
 		elseif !isnothing(st.a)
@@ -335,21 +337,17 @@ begin
 			inputs_aRₛ = "a, Rₛ"
 			ρₛ = get_ρₛ(P, aRₛ)
 			inputs_ρₛ = "P, aRₛ"
-		elseif !isnothing(st.ρₛ)
-			ρₛ = st.ρₛ
-			inputs_ρₛ = "given"
-			aRₛ = get_aRₛ(ρₛ, P)
-			inputs_aRₛ = "ρₛ, P"
-		elseif !isnothing(st.Mₛ)
-			ρₛ = get_ρₛ(Mₛ, Rₛ)
-			inputs_ρₛ = "Mₛ, Rₛ"
-			aRₛ = get_aRₛ(ρₛ, P)
-			inputs_aRₛ = "ρₛ, P"
 		else
-			ρₛ = get_ρₛ(Mₛ, Rₛ)
-			inputs_ρₛ = "Mₛ, Rₛ"
-			aRₛ = get_aRₛ(ρₛ, P)
-			inputs_aRₛ = "ρₛ, P"
+			error("ρₛ or (aRₛ or a) must be given for $(st.name)")
+		end
+		
+		# Mₛ
+		if !isnothing(st.Mₛ)
+			Mₛ = st.Mₛ
+			inputs_Mₛ = "given"
+		else
+			Mₛ = get_Mₛ(ρₛ=ρₛ, Rₛ=Rₛ)
+			inputs_Mₛ = "ρₛ, Rₛ"
 		end
 
 		# Calculate remaining params if not given/calculated
