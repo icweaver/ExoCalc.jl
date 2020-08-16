@@ -35,7 +35,9 @@ md"### How parameters were calculated"
 md"""
 This first checks if there are missing input parameters and then calls the appropriate function to calculate them for each study. The resulting derived parameters are then calculated from them.
 
-Everything was done with a "star first" approach, meaning that all stellar parameters were determined first, and then the planet parameters were determined self-consistently from that. If conflicting parameters are given, the calculator will try to give priority to direct observables and error otherwise. 
+Everything was done with a "star first" approach, meaning that all stellar parameters were determined first, and then the planet parameters were determined self-consistently from that. If conflicting parameters are given, the calculator will try to give priority to using direct observables to perform calculations and error otherwise. 
+
+For transparency, the inputs used for each calculation are show in parenthesis next to each parameter.
 """
 
 # ╔═╡ 49f75dea-dda0-11ea-1a85-bbdd4750b878
@@ -71,6 +73,8 @@ begin
 
 	# Star luminosity
 	get_Lₛ(; Tₛ, Rₛ) = 4.0π * Rₛ^2 * σ * Tₛ^4
+	
+	# Star temperature 
 	get_Tₛ(; Lₛ, Rₛ) = (L / (4.0π * Rₛ^2 * σ))^(1//4)
 
 	#Planet mass
@@ -241,7 +245,7 @@ md"### Structure used to hold a summary of all inputs and derived params"
 	RₚRₛ::Union{Measurement, Nothing} = nothing
 	inputs_RₚRₛ::Union{String, Nothing} = nothing
 	P	= nothing
-	inputs_P::String = "given"
+	inputs_P::Union{String, Nothing} = nothing
 	aRₛ::Union{Measurement, Nothing} = nothing
 	inputs_aRₛ::Union{String, Nothing} = nothing
 	a	= nothing
@@ -249,15 +253,15 @@ md"### Structure used to hold a summary of all inputs and derived params"
 	inputs_b::Union{String, Nothing} = nothing
 	inputs_a::Union{String, Nothing} = nothing
 	K	= nothing
-	inputs_K::String = "given"
+	inputs_K::Union{String, Nothing} = nothing
 	i	= nothing
-	inputs_i::String = "given"
+	inputs_i::Union{String, Nothing} = nothing
 	
 	# Planet params
 	μ	= nothing
-	inputs_μ::String = "given"
+	inputs_μ::Union{String, Nothing} = nothing
 	α::Union{Measurement, Nothing} = nothing
-	inputs_α::String = "given"
+	inputs_α::Union{String, Nothing} = nothing
 	gₚ	= nothing
 	inputs_gₚ::Union{String, Nothing} = nothing
 	Mₚ	= nothing
@@ -308,7 +312,7 @@ begin
 				Lₛ, Tₛ = st.Lₛ, st.Tₛ
 				inputs_Lₛ, inputs_Tₛ = "given", "given"
 				Rₛ = get_Rₛ(Lₛ=Lₛ, Tₛ=Tₛ)
-				inputs_Rₛ = "st.Lₛ, st.Tₛ"
+				inputs_Rₛ = "Lₛ, Tₛ"
 			else
 				error("Rₛ was not given. Lₛ and Tₛ must be given then.")
 			end
@@ -322,7 +326,7 @@ begin
 			inputs_RₚRₛ = "Rₚ, Rₛ"
 		elseif !isnothing(st.RₚRₛ)
 			RₚRₛ = st.RₚRₛ
-			inputs_RₚRₛ = "given"
+			inputs_RₚRₛ = "RₚRₛ"
 			Rₚ = get_Rₚ(RₚRₛ=RₚRₛ, Rₛ=Rₛ)
 			inputs_Rₚ = "RₚRₛ, Rₛ"
 		else
@@ -379,30 +383,48 @@ begin
 		end
 
 		# Calculate remaining params if not given/calculated
+		if isnothing(st.i)
+			error("Must provide inclination (i).")
+		else
+			i = st.i
+			inputs_i = "given"
+		end
+		if isnothing(st.K)
+			error("Must provide RV semi-amplitude (K).")
+		else
+			K = st.K
+			inputs_K = "given"
+		end
+		if isnothing(st.α)
+			error("Must provide albedo (α).")
+		else
+			α = st.α
+			inputs_α = "given"
+		end
 		if !isnothing(st.b)
 			b = st.b
 			inputs_b = "given"
 		else
-			b = get_b(aRₛ=aRₛ, i=st.i)
+			b = get_b(aRₛ=aRₛ, i=i)
 			inputs_b = "aRₛ, i"
 		end
 		if !isnothing(st.Mₚ)
 			Mₚ = st.Mₚ
 			inputs_Mₚ = "given"
 		else
-			Mₚ = get_Mₚ(K=st.K, i=st.i, P=P, Mₛ=Mₛ)
+			Mₚ = get_Mₚ(K=K, i=i, P=P, Mₛ=Mₛ)
 			inputs_Mₚ = "K, i, P, Mₛ"
 		end
 		if !isnothing(st.Tₚ)
 			Tₚ = st.Tₚ
 			inputs_Tₚ = "given"
 		else
-			Tₚ = get_Tₚ(Tₛ=Tₛ, aRₛ=aRₛ, α=st.α)
+			Tₚ = get_Tₚ(Tₛ=Tₛ, aRₛ=aRₛ, α=α)
 			inputs_Tₚ = "Tₛ, aRₛ, α"
 		end
 		if !isnothing(st.gₛ)
 			gₛ = st.gₛ
-			inputs_gₛ = "given"
+			inputs_gₛ = "gₛ"
 		else
 			gₛ = get_gₛ(Mₛ=Mₛ, Rₛ=Rₛ)
 			inputs_gₛ = "Mₛ, Rₛ"
@@ -416,7 +438,13 @@ begin
 		end
 		
 		# Calculate depth
-		H  = get_H(μ=st.μ, Tₚ=Tₚ, gₚ=gₚ)
+		if isnothing(st.μ)
+			error("Must provide mean molecula weight (μ).")
+		else
+			μ = st.μ
+			inputs_μ = "given"
+		end
+		H  = get_H(μ=μ, Tₚ=Tₚ, gₚ=gₚ)
 		inputs_H = "μ, Tₚ, gₚ"
 		ΔD = get_ΔD(H=H, RₚRₛ=RₚRₛ, Rₛ=Rₛ)
 
@@ -431,14 +459,18 @@ begin
 			inputs_P = inputs_P,
 			aRₛ = aRₛ,
 			inputs_aRₛ = inputs_aRₛ,
-			K	= st.K,
-			i	= st.i,
+			K	= K,
+			inputs_K = inputs_K,
+			i	= i,
+			inputs_i = inputs_i,
 			b   = b,
 			inputs_b = inputs_b,
 
 			# Planet params
-			μ	= st.μ,
-			α	= st.α,
+			μ	= μ,
+			inputs_μ = inputs_μ,
+			α	= α,
+			inputs_α = inputs_α,
 			gₚ	= gₚ,
 			inputs_gₚ = inputs_gₚ,
 			Mₚ	= Mₚ,
@@ -477,8 +509,8 @@ function display_summary(d::Derived)
 	md"""
 	###### **$(d.name):**
 	**Star Params** \
-	Mₛ( $(d.inputs_Mₛ) ) = $(uconvert(u"Msun", d.Mₛ)) \
 	Rₛ( $(d.inputs_Rₛ) ) = $(uconvert(u"Rsun", d.Rₛ)) \
+	Mₛ( $(d.inputs_Mₛ) ) = $(uconvert(u"Msun", d.Mₛ)) \
 	Tₛ( $(d.inputs_Tₛ) ) = $(uconvert(u"K", d.Tₛ)) \
 	Lₛ( $(d.inputs_Lₛ) ) = $(uconvert(u"Lsun", d.Lₛ)) \
 	ρₛ( $(d.inputs_ρₛ) ) = $(uconvert(u"g/cm^3", d.ρₛ)) \
@@ -495,8 +527,8 @@ function display_summary(d::Derived)
 	**Planet params** \
 	μ( $(d.inputs_μ) ) = $(uconvert(u"u", d.μ)) \
 	α( $(d.inputs_α) ) = $(uconvert(NoUnits, d.α)) \
-	Mₚ( $(d.inputs_Mₚ) ) = $(uconvert(u"Mjup", d.Mₚ)) \
 	Rₚ( $(d.inputs_Rₚ) ) = $(uconvert(u"Rjup", d.Rₚ)) \
+	Mₚ( $(d.inputs_Mₚ) ) = $(uconvert(u"Mjup", d.Mₚ)) \
 	Tₚ( $(d.inputs_Tₚ) ) = $(uconvert(u"K", d.Tₚ)) \
 	gₚ( $(d.inputs_gₚ) ) = $(uconvert(u"m/s^2", d.gₚ)) \
 	H( $(d.inputs_H) ) = $(uconvert(u"km", d.H))
