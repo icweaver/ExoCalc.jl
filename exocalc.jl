@@ -28,12 +28,15 @@ md"[Sources](https://exoplanetarchive.ipac.caltech.edu/overview/HAT-P-23%20b#leg
 # ╔═╡ 7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 md"### Results"
 
+# ╔═╡ 38a61304-e0fe-11ea-14b2-17d9b9e13c7b
+md"### Calculate parameters"
+
 # ╔═╡ 0b6821a4-dac3-11ea-27d7-911521f0d3c0
 md"### How parameters were calculated"
 
 # ╔═╡ f8281da6-dd9f-11ea-1b6c-d32702215397
 md"""
-This first checks if there are missing input parameters and then calls the appropriate function to calculate them for each study. The resulting derived parameters are then calculated from them.
+The calculator first checks if there are missing input parameters and then calls the appropriate function to calculate them for each study. The resulting derived parameters are then calculated from them.
 
 Everything was done with a "star first" approach, meaning that all stellar parameters were determined first, and then the planet parameters were determined self-consistently from that. If conflicting parameters are given, the calculator will try to give priority to using direct observables to perform calculations and error otherwise. 
 
@@ -97,42 +100,42 @@ begin
 end;
 
 # ╔═╡ c5c5ea28-dd9e-11ea-1f89-5b1371831177
-md"### Function for displaying the results"
+md"### Function to display the results"
 
 # ╔═╡ 8e5811ae-dd9e-11ea-127e-b9812511492b
 md"### Structure used to hold the possible input parameters used by a study"
 
 # ╔═╡ db28dbd2-db12-11ea-28e4-2b6cf30bd102
-@with_kw_noshow struct Study @deftype Union{Nothing, Quantity}
-	# Reference name (i.e. Ciceri et al. 2015)
+@with_kw_noshow struct Study @deftype Union{Nothing, Quantity, Measurement}
+	# Reference name (e.g. Ciceri et al. 2015)
 	name::String = "Custom"
 	
 	# Star params
-	Tₛ = nothing								# Effective temperature
-	ρₛ = nothing								# Density
-	Mₛ = nothing								# Mass
-	Rₛ = nothing								# Radius
-	gₛ = nothing								# Surface gravity
-	Lₛ = nothing								# Luminosity
+	Tₛ = nothing
+	ρₛ = nothing
+	Mₛ = nothing
+	Rₛ = nothing
+	gₛ = nothing
+	Lₛ = nothing
 
 	# Orbital params
-	RₚRₛ::Union{Measurement, Nothing} = nothing # Planet to star radius ratio
-	aRₛ::Union{Measurement, Nothing} = nothing	# Semi-major axis to star radius ratio
-	a::Union{Measurement, Nothing} = nothing	# Semi-major axis
-	b::Union{Measurement, Nothing} = nothing	# Impact parameter
-	P = nothing									# Period
-	K = nothing									# RV semi-amplitude
-	i = nothing									# Inclination
+	RₚRₛ = nothing
+	aRₛ = nothing
+	a = nothing
+	b = nothing
+	P = nothing
+	K = nothing
+	i = nothing
 
 	# Planet params
-	μ = nothing									# Mean molecular weight
-	α::Union{Measurement, Nothing} = nothing	# Albedo
-	Tₚ = nothing								# Equilibrium temperature
-	ρₚ = nothing								# Density
-	Mₚ = nothing								# Mass
-	Rₚ = nothing								# Radius
-	gₚ = nothing								# Surface gravity
-	n_scales::Float64 = 5.0                     # Number of scale heights
+	μ = nothing
+	α = nothing
+	Tₚ = nothing
+	ρₚ = nothing
+	Mₚ = nothing
+	Rₚ = nothing
+	gₚ = nothing
+	N_scales::Float64 = 5.0 # Number of scale heights (default 5)
 end;
 
 # ╔═╡ 17302d74-d63b-11ea-3de3-49f0df0554ca
@@ -169,7 +172,7 @@ studies = [
 		name = "HAT-P-23/b: Sada & Ramón-Fox (2016)",
 		μ	 = 2.0*amu,
 		α	 = 0.0 ± 0.0,
-		K	 = (346.0 ± 21)u"m/s", # latest RV data, from B17
+		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
 		i	 = (85.1 ± 1.5)u"°",  # latest RV data, from B17
 		P	 = (1.212880 ± 0.000002)u"d", # latest transit data: (S&R16)
 		RₚRₛ = 0.1113 ± 0.0010, # latest transit data: (S&R16)
@@ -181,7 +184,7 @@ studies = [
 		name = "HAT-P-23/b: Stassun et al. (2017, GAIA DR1)",
 		μ	 = 2.0*amu,
 		α	 = 0.0 ± 0.0,
-		K	 = (346.0 ± 21)u"m/s", # latest RV data, from B17
+		K	 = (368.5 ± 17.6)u"m/s",
 		i	 = (85.1 ± 1.5)u"°",  # latest RV data, from B17
 		P	 = (1.212880 ± 0.000002)u"d",
 		RₚRₛ = 0.1113 ± 0.0010,
@@ -200,14 +203,14 @@ studies = [
 		Tₛ	 = (5734.0 ± 100.0)u"K",
 		Rₛ	 = (1.1858169 ± 0.0424133)u"Rsun",
 		Lₛ	 = (10.0^(0.13656067 ± 0.00864667))u"Lsun",
-		Mₚ	 = (1.34 ± 0.59)u"Mjup", # DR1 mass, gives inconsistent ΔD=550ppm result
-		aRₛ  = (4.26 ± 0.14), # latest transit data: (S&R16) 
+		#Mₚ	 = (1.34 ± 0.59)u"Mjup", # DR1 mass, gives inconsistent ΔD=550ppm result
+		aRₛ  = (4.26 ± 0.14), # latest transit data: (S&R16)
 	),
 	Study(
 		name = "HAT-P-23/b: TICv8",
 		μ	 = 2.0*amu,
 		α	 = 0.0 ± 0.0,
-		K	 = (368.0 ± 21)u"m/s", # latest RV data, from B17
+		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
 		i	 = (85.1 ± 1.5)u"°",  # latest RV data, from B17
 		P	 = (1.2128867 ± 0.0000002)u"d", # latest transit data: (S&R16)
 		RₚRₛ = 0.1113 ± 0.0010, # latest transit data: (S&R16)
@@ -220,326 +223,365 @@ studies = [
 	),
 ];
 
+# ╔═╡ c01eb856-e0f9-11ea-01d5-07593189ce46
+function calculate_params(st::Study)
+	# Rₛ, Tₛ, Lₛ
+	if !isnothing(st.Rₛ)
+		Rₛ = st.Rₛ
+		inputs_Rₛ = (Rₛ=Rₛ,)
+		if any((!isnothing).([st.Tₛ, st.Lₛ]))
+			if all((!isnothing).([st.Tₛ, st.Lₛ]))
+				Lₛ = st.Lₛ
+				inputs_Lₛ = (Lₛ=Lₛ,)
+				Tₛ = st.Tₛ
+				inputs_Tₛ = (Tₛ=Tₛ,)
+			elseif isnothing(st.Tₛ)
+				Lₛ = st.Lₛ
+				inputs_Lₛ = (Lₛ=Lₛ,)
+				inputs_Tₛ = (Lₛ=Lₛ, Rₛ=Rₛ)
+				Tₛ = get_Tₛ(; inputs_Tₛ...)
+			else
+				Tₛ = st.Tₛ
+				inputs_Tₛ = (Tₛ=Tₛ,)
+				inputs_Lₛ = (Tₛ=Tₛ, Rₛ=Rₛ)
+				Lₛ = get_Lₛ(; inputs_Lₛ...)
+			end
+		else
+			error("Rₛ was given. Lₛ or Tₛ must also be given.")
+		end
+	else
+		if all((!isnothing).([st.Lₛ, st.Tₛ]))
+			Lₛ, Tₛ = st.Lₛ, st.Tₛ
+			inputs_Lₛ, inputs_Tₛ = (Lₛ=Lₛ,), (Tₛ=Tₛ,)
+			inputs_Rₛ = (Lₛ=Lₛ, Tₛ=Tₛ)
+			Rₛ = get_Rₛ(; inputs_Rₛ...)
+		else
+			error("Rₛ was not given. Lₛ and Tₛ must be given then.")
+		end
+	end
+
+	# RₚRₛ and Rₚ
+	if !isnothing(st.Rₚ)
+		Rₚ = st.Rₚ
+		inputs_Rₚ = (Rₚ=Rₚ,)
+		inputs_RₚRₛ = (Rₚ=Rₚ, Rₛ=Rₛ)
+		RₚRₛ = get_RₚRₛ(; inputs_RₚRₛ...)
+	elseif !isnothing(st.RₚRₛ)
+		RₚRₛ = st.RₚRₛ
+		inputs_RₚRₛ = (RₚRₛ=RₚRₛ,)
+		inputs_Rₚ = (RₚRₛ=RₚRₛ, Rₛ=Rₛ)
+		Rₚ = get_Rₚ(; inputs_Rₚ...)
+	else
+		error("Please specify either RₚRₛ or Rₚ.")
+	end
+
+	# P
+	if !isnothing(st.P)
+		P = st.P
+		inputs_P = (P=P,)
+	else
+		error("Please specify a period.")
+	end
+
+	# ρₛ, aRₛ, a
+	if all((!isnothing).([st.aRₛ, st.ρₛ]))
+		error("Conflicting inputs. Only aRₛ or ρₛ can be given.")
+	end
+	if all((!isnothing).([st.aRₛ, st.b]))
+		error("Conflicting inputs. Only aRₛ or b can be given.")
+	end
+	if !isnothing(st.ρₛ)
+		ρₛ = st.ρₛ
+		inputs_ρₛ = (ρₛ=ρₛ,)
+		inputs_aRₛ = (ρₛ=ρₛ, P=P)
+		aRₛ = get_aRₛ(inputs_aRₛ...)
+		inputs_a = (aRₛ=aRₛ, Rₛ=Rₛ)
+		a = get_a(; inputs_a...)
+	elseif !isnothing(st.aRₛ)
+		aRₛ = st.aRₛ
+		inputs_aRₛ = (aRₛ=aRₛ,)
+		inputs_a = (aRₛ=aRₛ, Rₛ=Rₛ)
+		a = get_a(; inputs_a...)
+		inputs_ρₛ = (P=P, aRₛ=aRₛ)
+		ρₛ = get_ρₛ(inputs_ρₛ...)
+	elseif !isnothing(st.a)
+		a = st.a
+		inputs_a = (a=a,)
+		inputs_aRₛ = (a=a, Rₛ=Rₛ)
+		aRₛ = get_aRₛ(inputs_aRₛ...)
+		inputs_ρₛ = (P=P, aRₛ=aRₛ)
+		ρₛ = get_ρₛ(inputs_ρₛ...)
+	else
+		error("ρₛ or (aRₛ or a) must be given for $(st.name)")
+	end
+
+	# Mₛ
+	if !isnothing(st.Mₛ)
+		Mₛ = st.Mₛ
+		inputs_Mₛ = (Mₛ=Mₛ,)
+	else
+		inputs_Mₛ = (ρₛ=ρₛ, Rₛ=Rₛ)
+		Mₛ = get_Mₛ(; inputs_Mₛ...)
+	end
+
+	# Calculate remaining params if not given/calculated
+	if isnothing(st.i)
+		error("Must provide inclination (i).")
+	else
+		i = st.i
+		inputs_i = (i=i,)
+	end
+	if isnothing(st.K)
+		error("Must provide RV semi-amplitude (K).")
+	else
+		K = st.K
+		inputs_K = (K=K,)
+	end
+	if isnothing(st.α)
+		error("Must provide albedo (α).")
+	else
+		α = st.α
+		inputs_α = (α=α,)
+	end
+	if !isnothing(st.b)
+		b = st.b
+		inputs_b = (b=b,)
+	else
+		inputs_b = (aRₛ=aRₛ, i=i)
+		b = get_b(; inputs_b...)
+	end
+	if !isnothing(st.Mₚ)
+		Mₚ = st.Mₚ
+		inputs_Mₚ = (Mₚ=Mₚ,)
+	else
+		inputs_Mₚ = (K=K, i=i, P=P, Mₛ=Mₛ)
+		Mₚ = get_Mₚ(; inputs_Mₚ...)
+	end
+	if !isnothing(st.Tₚ)
+		Tₚ = st.Tₚ
+		inputs_Tₚ = (Tₚ=Tₚ,)
+	else
+		inputs_Tₚ = (Tₛ=Tₛ, aRₛ=aRₛ, α=α)
+		Tₚ = get_Tₚ(; inputs_Tₚ...)
+	end
+	if !isnothing(st.gₛ)
+		gₛ = st.gₛ
+		inputs_gₛ = (gₛ=gₛ,)
+	else
+		inputs_gₛ = (Mₛ=Mₛ, Rₛ=Rₛ)
+		gₛ = get_gₛ(; inputs_gₛ...)
+	end
+	if !isnothing(st.gₚ)
+		gₚ = st.gₚ
+		inputs_gₚ = (gₚ=gₚ,)
+	else
+		inputs_gₚ = (Mₚ=Mₚ, RₚRₛ=RₚRₛ, Rₛ=Rₛ)
+		gₚ = get_gₚ(; inputs_gₚ...)
+	end
+
+	# Calculate signal
+	if isnothing(st.μ)
+		error("Must provide mean molecula weight (μ).")
+	else
+		μ = st.μ
+		inputs_μ = (μ=μ,)
+	end
+	inputs_H = (μ=μ, Tₚ=Tₚ, gₚ=gₚ)
+	H  = get_H(; inputs_H...)
+	ΔD = get_ΔD(H=H, RₚRₛ=RₚRₛ, Rₛ=Rₛ)
+	
+	# Store results
+	params = (
+		# Star Params
+		ρₛ	= ρₛ,
+		gₛ	= gₛ,
+		Mₛ	= Mₛ,
+		Rₛ	= Rₛ,
+		Tₛ	= Tₛ,
+		Lₛ  = Lₛ,
+
+		#Orbital params
+		RₚRₛ = RₚRₛ,
+		P	= P,
+		aRₛ = aRₛ,
+		a = a,
+		K	= K,
+		i	= i,
+		b   = b,
+
+		# Planet params
+		μ	= μ,
+		α	= α,
+		gₚ	= gₚ,
+		Mₚ	= Mₚ,
+		Rₚ	= Rₚ,
+		Tₚ	= Tₚ,
+		H	= H,
+
+		# Signal
+		N_scales = st.N_scales,
+		ΔD	= ΔD,
+	)
+	
+	params_inputs = (
+		# Star Params
+		inputs_ρₛ = inputs_ρₛ,
+		inputs_gₛ = inputs_gₛ,
+		inputs_Mₛ = inputs_Mₛ,
+		inputs_Rₛ = inputs_Rₛ,
+		inputs_Tₛ = inputs_Tₛ,
+		inputs_Lₛ = inputs_Lₛ,
+
+		#Orbital params
+		inputs_RₚRₛ = inputs_RₚRₛ,
+		inputs_P = inputs_P,
+		inputs_aRₛ = inputs_aRₛ,
+		inputs_a = inputs_a,
+		inputs_K = inputs_K,
+		inputs_i = inputs_i,
+		inputs_b = inputs_b,
+
+		# Planet params
+		inputs_μ = inputs_μ,
+		inputs_α = inputs_α,
+		inputs_gₚ = inputs_gₚ,
+		inputs_Mₚ = inputs_Mₚ,
+		inputs_Rₚ = inputs_Rₚ,
+		inputs_Tₚ = inputs_Tₚ,
+		inputs_H = inputs_H,
+	)
+	
+	return params, params_inputs;
+end
+
 # ╔═╡ a8df7ad0-dd9e-11ea-2a6a-f16683371016
-md"### Structure used to hold a summary of all inputs and derived params"
+md"### Structure to hold a summary of all parameters"
 
 # ╔═╡ bd752a9e-dd80-11ea-141c-779c5135d4d8
-@with_kw_noshow struct Derived @deftype Union{Nothing, Quantity}
+@with_kw_noshow struct Derived @deftype Quantity
+	# Reference name (e.g. Ciceri et al. 2015)
 	name::String = "Custom"
 	
 	# Star Params
-	ρₛ	= nothing
-	inputs_ρₛ::Union{String, Nothing} = nothing
-	gₛ	= nothing
-	inputs_gₛ::Union{String, Nothing} = nothing
-	Mₛ	= nothing
-	inputs_Mₛ::Union{String, Nothing} = nothing
-	Rₛ	= nothing
-	inputs_Rₛ::Union{String, Nothing} = nothing
-	Tₛ	= nothing
-	inputs_Tₛ::Union{String, Nothing} = nothing
-	Lₛ	= nothing
-	inputs_Lₛ::Union{String, Nothing} = nothing
-	
-	#Orbital params
-	RₚRₛ::Union{Measurement, Nothing} = nothing
-	inputs_RₚRₛ::Union{String, Nothing} = nothing
-	P	= nothing
-	inputs_P::Union{String, Nothing} = nothing
-	aRₛ::Union{Measurement, Nothing} = nothing
-	inputs_aRₛ::Union{String, Nothing} = nothing
-	a	= nothing
-	b::Union{Measurement, Nothing} = nothing
-	inputs_b::Union{String, Nothing} = nothing
-	inputs_a::Union{String, Nothing} = nothing
-	K	= nothing
-	inputs_K::Union{String, Nothing} = nothing
-	i	= nothing
-	inputs_i::Union{String, Nothing} = nothing
-	
-	# Planet params
-	μ	= nothing
-	inputs_μ::Union{String, Nothing} = nothing
-	α::Union{Measurement, Nothing} = nothing
-	inputs_α::Union{String, Nothing} = nothing
-	gₚ	= nothing
-	inputs_gₚ::Union{String, Nothing} = nothing
-	Mₚ	= nothing
-	inputs_Mₚ::Union{String, Nothing} = nothing
-	Rₚ	= nothing
-	inputs_Rₚ::Union{String, Nothing} = nothing
-	Tₚ	= nothing
-	inputs_Tₚ::Union{String, Nothing} = nothing
-	H	= nothing
-	inputs_H::Union{String, Nothing} = nothing
+	ρₛ
+	gₛ
+	Mₛ
+	Rₛ
+	Tₛ
+	Lₛ
 
+	#Orbital params
+	RₚRₛ::Measurement
+	P
+	aRₛ::Measurement
+	a
+	b::Measurement
+	K
+	i
+
+	# Planet params
+	μ
+	α::Measurement
+	gₚ
+	Mₚ
+	Rₚ
+	Tₚ
+	H
 
 	# Signal
-	n_scales::Float64 = 5.0
-	ΔD	= nothing
+	N_scales::Float64
+	ΔD
+end;
+
+# ╔═╡ 855e7c4c-e0fe-11ea-1bbb-1b9db42a984d
+md"### Structure to hold the inputs used to calculate each parameter"
+
+# ╔═╡ 410f5804-e0ef-11ea-0576-e1692cd42b1b
+@with_kw_noshow struct Derived_inputs @deftype NamedTuple
+	# Reference name (e.g. Ciceri et al. 2015)
+	name::String = "Custom"
+	
+	# Star Params
+	inputs_ρₛ
+	inputs_gₛ
+	inputs_Mₛ
+	inputs_Rₛ
+	inputs_Tₛ
+	inputs_Lₛ
+	
+	#Orbital params
+	inputs_RₚRₛ
+	inputs_P
+	inputs_aRₛ
+	inputs_a
+	inputs_b
+	inputs_K
+	inputs_i
+	
+	# Planet params
+	inputs_μ
+	inputs_α
+	inputs_gₚ
+	inputs_Mₚ
+	inputs_Rₚ
+	inputs_Tₚ
+	inputs_H
 end;
 
 # ╔═╡ 3833772c-d63f-11ea-09b5-f36d68e512ea
 begin
-	results = []
+	results, results_inputs = [], []
 	for st in studies
-		# Rₛ, Tₛ, Lₛ
-		if !isnothing(st.Rₛ)
-			Rₛ = st.Rₛ
-			inputs_Rₛ = "given"
-			if any((!isnothing).([st.Tₛ, st.Lₛ]))
-				if all((!isnothing).([st.Tₛ, st.Lₛ]))
-					Lₛ = st.Lₛ
-					inputs_Lₛ = "given"
-					Tₛ = st.Tₛ
-					inputs_Tₛ = "given"
-				elseif isnothing(st.Tₛ)
-					Lₛ = st.Lₛ
-					inputs_Lₛ = "given"
-					Tₛ = get_Tₛ(Lₛ=Lₛ, Rₛ=Rₛ)
-					inputs_Tₛ = "Lₛ, Rₛ"
-				else
-					Tₛ = st.Tₛ
-					inputs_Tₛ = "given"
-					Lₛ = get_Lₛ(Tₛ=Tₛ, Rₛ=Rₛ)
-					inputs_Lₛ = "Tₛ, Rₛ"
-				end
-			else
-				error("Rₛ was given. Lₛ or Tₛ must also be given.")
-			end
-		else
-			if all((!isnothing).([st.Lₛ, st.Tₛ]))
-				Lₛ, Tₛ = st.Lₛ, st.Tₛ
-				inputs_Lₛ, inputs_Tₛ = "given", "given"
-				Rₛ = get_Rₛ(Lₛ=Lₛ, Tₛ=Tₛ)
-				inputs_Rₛ = "Lₛ, Tₛ"
-			else
-				error("Rₛ was not given. Lₛ and Tₛ must be given then.")
-			end
-		end
-
-		# RₚRₛ and Rₚ
-		if !isnothing(st.Rₚ)
-			Rₚ = st.Rₚ
-			inputs_Rₚ = "given"
-			RₚRₛ = get_RₚRₛ(Rₚ=Rₚ, Rₛ=Rₛ)
-			inputs_RₚRₛ = "Rₚ, Rₛ"
-		elseif !isnothing(st.RₚRₛ)
-			RₚRₛ = st.RₚRₛ
-			inputs_RₚRₛ = "RₚRₛ"
-			Rₚ = get_Rₚ(RₚRₛ=RₚRₛ, Rₛ=Rₛ)
-			inputs_Rₚ = "RₚRₛ, Rₛ"
-		else
-			error("Please specify either RₚRₛ or Rₚ.")
-		end
-
-		# P
-		if !isnothing(st.P)
-			P = st.P
-			inputs_P = "given"
-		else
-			error("Please specify a period.")
-		end
-
-		# ρₛ, aRₛ, a
-		if all((!isnothing).([st.aRₛ, st.ρₛ]))
-			error("Conflicting inputs. Only aRₛ or ρₛ can be given.")
-		end
-		if all((!isnothing).([st.aRₛ, st.b]))
-			error("Conflicting inputs. Only aRₛ or b can be given.")
-		end
-		if !isnothing(st.ρₛ)
-			ρₛ = st.ρₛ
-			inputs_ρₛ = "given"
-			aRₛ = get_aRₛ(ρₛ, P)
-			inputs_aRₛ = "ρₛ, P"
-			a = get_a(aRₛ=aRₛ, Rₛ=Rₛ)
-			inputs_a = "aRₛ, Rₛ"
-		elseif !isnothing(st.aRₛ)
-			aRₛ = st.aRₛ
-			inputs_aRₛ = "given"
-			a = get_a(aRₛ=aRₛ, Rₛ=Rₛ)
-			inputs_a = "aRₛ, Rₛ"
-			ρₛ = get_ρₛ(P, aRₛ)
-			inputs_ρₛ = "P, aRₛ"
-		elseif !isnothing(st.a)
-			a = st.a
-			inputs_a = "given"
-			aRₛ = get_aRₛ(a, Rₛ)
-			inputs_aRₛ = "a, Rₛ"
-			ρₛ = get_ρₛ(P, aRₛ)
-			inputs_ρₛ = "P, aRₛ"
-		else
-			error("ρₛ or (aRₛ or a) must be given for $(st.name)")
-		end
+		# Calculate parameters
+		params, params_inputs = calculate_params(st)
 		
-		# Mₛ
-		if !isnothing(st.Mₛ)
-			Mₛ = st.Mₛ
-			inputs_Mₛ = "given"
-		else
-			Mₛ = get_Mₛ(ρₛ=ρₛ, Rₛ=Rₛ)
-			inputs_Mₛ = "ρₛ, Rₛ"
-		end
-
-		# Calculate remaining params if not given/calculated
-		if isnothing(st.i)
-			error("Must provide inclination (i).")
-		else
-			i = st.i
-			inputs_i = "given"
-		end
-		if isnothing(st.K)
-			error("Must provide RV semi-amplitude (K).")
-		else
-			K = st.K
-			inputs_K = "given"
-		end
-		if isnothing(st.α)
-			error("Must provide albedo (α).")
-		else
-			α = st.α
-			inputs_α = "given"
-		end
-		if !isnothing(st.b)
-			b = st.b
-			inputs_b = "given"
-		else
-			b = get_b(aRₛ=aRₛ, i=i)
-			inputs_b = "aRₛ, i"
-		end
-		if !isnothing(st.Mₚ)
-			Mₚ = st.Mₚ
-			inputs_Mₚ = "given"
-		else
-			Mₚ = get_Mₚ(K=K, i=i, P=P, Mₛ=Mₛ)
-			inputs_Mₚ = "K, i, P, Mₛ"
-		end
-		if !isnothing(st.Tₚ)
-			Tₚ = st.Tₚ
-			inputs_Tₚ = "given"
-		else
-			Tₚ = get_Tₚ(Tₛ=Tₛ, aRₛ=aRₛ, α=α)
-			inputs_Tₚ = "Tₛ, aRₛ, α"
-		end
-		if !isnothing(st.gₛ)
-			gₛ = st.gₛ
-			inputs_gₛ = "gₛ"
-		else
-			gₛ = get_gₛ(Mₛ=Mₛ, Rₛ=Rₛ)
-			inputs_gₛ = "Mₛ, Rₛ"
-		end
-		if !isnothing(st.gₚ)
-			gₚ = st.gₚ
-			inputs_gₚ = "given"
-		else
-			gₚ = get_gₚ(Mₚ=Mₚ, RₚRₛ=RₚRₛ, Rₛ=Rₛ)
-			inputs_gₚ = "Mₚ, RₚRₛ, Rₛ"
-		end
-		
-		# Calculate depth
-		if isnothing(st.μ)
-			error("Must provide mean molecula weight (μ).")
-		else
-			μ = st.μ
-			inputs_μ = "given"
-		end
-		H  = get_H(μ=μ, Tₚ=Tₚ, gₚ=gₚ)
-		inputs_H = "μ, Tₚ, gₚ"
-		ΔD = get_ΔD(H=H, RₚRₛ=RₚRₛ, Rₛ=Rₛ)
-
 		# Store summary
-		summary = Derived(
-			name = st.name,
-
-			#Orbital params
-			RₚRₛ = RₚRₛ,
-			inputs_RₚRₛ = inputs_RₚRₛ,
-			P	= P,
-			inputs_P = inputs_P,
-			aRₛ = aRₛ,
-			inputs_aRₛ = inputs_aRₛ,
-			K	= K,
-			inputs_K = inputs_K,
-			i	= i,
-			inputs_i = inputs_i,
-			b   = b,
-			inputs_b = inputs_b,
-
-			# Planet params
-			μ	= μ,
-			inputs_μ = inputs_μ,
-			α	= α,
-			inputs_α = inputs_α,
-			gₚ	= gₚ,
-			inputs_gₚ = inputs_gₚ,
-			Mₚ	= Mₚ,
-			inputs_Mₚ = inputs_Mₚ,
-			Rₚ	= Rₚ,
-			inputs_Rₚ = inputs_Rₚ,
-			Tₚ	= Tₚ,
-			inputs_Tₚ = inputs_Tₚ,
-			H	= H,
-			inputs_H = inputs_H,
-
-			# Star Params
-			ρₛ	= ρₛ,
-			inputs_ρₛ = inputs_ρₛ,
-			gₛ	= gₛ,
-			inputs_gₛ = inputs_gₛ,
-			Mₛ	= Mₛ,
-			inputs_Mₛ = inputs_Mₛ,
-			Rₛ	= Rₛ,
-			inputs_Rₛ = inputs_Rₛ,
-			Tₛ	= Tₛ,
-			inputs_Tₛ = inputs_Tₛ,
-			Lₛ  = Lₛ,
-			inputs_Lₛ = inputs_Lₛ,
-
-			# Signal
-			n_scales = st.n_scales,
-			ΔD	= ΔD,
-		)
+		summary = Derived(; name=st.name, params...)
 		push!(results, summary)
+		
+		# Store summary inputs
+		summary_inputs = Derived_inputs(; name=st.name, params_inputs...)
+		push!(results_inputs, summary_inputs)
 	end
 end;
 
 # ╔═╡ 33fc58d0-dbd9-11ea-3c45-83f4b5a2a818
-function display_summary(d::Derived)
+function display_summary(d::Derived, d_i::Derived_inputs)
 	md"""
 	###### **$(d.name):**
 	**Star Params** \
-	Rₛ( $(d.inputs_Rₛ) ) = $(uconvert(u"Rsun", d.Rₛ)) \
-	Mₛ( $(d.inputs_Mₛ) ) = $(uconvert(u"Msun", d.Mₛ)) \
-	Tₛ( $(d.inputs_Tₛ) ) = $(uconvert(u"K", d.Tₛ)) \
-	Lₛ( $(d.inputs_Lₛ) ) = $(uconvert(u"Lsun", d.Lₛ)) \
-	ρₛ( $(d.inputs_ρₛ) ) = $(uconvert(u"g/cm^3", d.ρₛ)) \
-	log gₛ (cm/s²)( $(d.inputs_gₛ) ) = $(log10(ustrip(uconvert(u"cm/s^2", d.gₛ))))
+	Rₛ $(keys(d_i.inputs_Rₛ)) = $(uconvert(u"Rsun", d.Rₛ)) \
+	Mₛ $(keys(d_i.inputs_Mₛ)) = $(uconvert(u"Msun", d.Mₛ)) \
+	Tₛ $(keys(d_i.inputs_Tₛ)) = $(uconvert(u"K", d.Tₛ)) \
+	Lₛ $(keys(d_i.inputs_Lₛ)) = $(uconvert(u"Lsun", d.Lₛ)) \
+	ρₛ $(keys(d_i.inputs_ρₛ)) = $(uconvert(u"g/cm^3", d.ρₛ)) \
+	log gₛ (cm/s²) $(keys(d_i.inputs_gₛ)) = 
+	$(log10(ustrip(uconvert(u"cm/s^2", d.gₛ))))
 	
 	**Orbital params** \
-	K( $(d.inputs_K) ) = $(uconvert(u"m/s", d.K)) \
-	i( $(d.inputs_i) ) = $(uconvert(u"°", d.i))
-	RₚRₛ( $(d.inputs_RₚRₛ) ) = $(uconvert(NoUnits, d.RₚRₛ)) \
-	aRₛ( $(d.inputs_aRₛ) ) = $(uconvert(NoUnits, d.aRₛ)) \
-	P( $(d.inputs_P) ) = $(uconvert(u"d", d.P)) \
-	b( $(d.inputs_b) ) = $(d.b)
+	K $(keys(d_i.inputs_K)) = $(uconvert(u"m/s", d.K)) \
+	i $(keys(d_i.inputs_i)) = $(uconvert(u"°", d.i)) \
+	RₚRₛ $(keys(d_i.inputs_RₚRₛ)) = $(uconvert(NoUnits, d.RₚRₛ)) \
+	aRₛ $(keys(d_i.inputs_aRₛ)) = $(uconvert(NoUnits, d.aRₛ)) \
+	P $(keys(d_i.inputs_P)) = $(uconvert(u"d", d.P)) \
+	b $(keys(d_i.inputs_b)) = $(d.b)
 
 	**Planet params** \
-	μ( $(d.inputs_μ) ) = $(uconvert(u"u", d.μ)) \
-	α( $(d.inputs_α) ) = $(uconvert(NoUnits, d.α)) \
-	Rₚ( $(d.inputs_Rₚ) ) = $(uconvert(u"Rjup", d.Rₚ)) \
-	Mₚ( $(d.inputs_Mₚ) ) = $(uconvert(u"Mjup", d.Mₚ)) \
-	Tₚ( $(d.inputs_Tₚ) ) = $(uconvert(u"K", d.Tₚ)) \
-	gₚ( $(d.inputs_gₚ) ) = $(uconvert(u"m/s^2", d.gₚ)) \
-	H( $(d.inputs_H) ) = $(uconvert(u"km", d.H))
+	μ $(keys(d_i.inputs_μ)) = $(uconvert(u"u", d.μ)) \
+	α $(keys(d_i.inputs_α)) = $(uconvert(NoUnits, d.α)) \
+	Rₚ $(keys(d_i.inputs_Rₚ)) = $(uconvert(u"Rjup", d.Rₚ)) \
+	Mₚ $(keys(d_i.inputs_Mₚ)) = $(uconvert(u"Mjup", d.Mₚ)) \
+	Tₚ $(keys(d_i.inputs_Tₚ)) = $(uconvert(u"K", d.Tₚ)) \
+	gₚ $(keys(d_i.inputs_gₚ)) = $(uconvert(u"m/s^2", d.gₚ)) \
+	H $(keys(d_i.inputs_H)) = $(uconvert(u"km", d.H))
 
-	**Signal at $(d.n_scales) scale heights** \
-	ΔD = $(d.n_scales * uconvert(NoUnits, d.ΔD) * 1e6) ppm
+	**Signal at $(d.N_scales) scale heights** \
+	ΔD = $(d.N_scales * uconvert(NoUnits, d.ΔD) * 1e6) ppm
 	"""
 end;
 
 # ╔═╡ 4bfaf322-dbd9-11ea-0449-87d9aa07311f
-display_summary.(results)
+display_summary.(results, results_inputs)
 
 # ╔═╡ 7db94ad6-dda1-11ea-2f33-1da144f1b7ad
 md"Libraries for using things like physical constants and units."
@@ -552,9 +594,11 @@ md"Libraries for using things like physical constants and units."
 # ╠═17302d74-d63b-11ea-3de3-49f0df0554ca
 # ╟─7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 # ╠═4bfaf322-dbd9-11ea-0449-87d9aa07311f
+# ╟─38a61304-e0fe-11ea-14b2-17d9b9e13c7b
+# ╠═3833772c-d63f-11ea-09b5-f36d68e512ea
 # ╟─0b6821a4-dac3-11ea-27d7-911521f0d3c0
 # ╟─f8281da6-dd9f-11ea-1b6c-d32702215397
-# ╠═3833772c-d63f-11ea-09b5-f36d68e512ea
+# ╠═c01eb856-e0f9-11ea-01d5-07593189ce46
 # ╟─49f75dea-dda0-11ea-1a85-bbdd4750b878
 # ╠═3f79c516-da77-11ea-1f6b-d3e7191a95d8
 # ╟─c5c5ea28-dd9e-11ea-1f89-5b1371831177
@@ -563,5 +607,7 @@ md"Libraries for using things like physical constants and units."
 # ╠═db28dbd2-db12-11ea-28e4-2b6cf30bd102
 # ╟─a8df7ad0-dd9e-11ea-2a6a-f16683371016
 # ╠═bd752a9e-dd80-11ea-141c-779c5135d4d8
+# ╟─855e7c4c-e0fe-11ea-1bbb-1b9db42a984d
+# ╠═410f5804-e0ef-11ea-0576-e1692cd42b1b
 # ╟─7db94ad6-dda1-11ea-2f33-1da144f1b7ad
 # ╠═02bfa078-d62b-11ea-15df-d701431829b9
