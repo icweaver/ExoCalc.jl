@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.6
+# v0.11.8
 
 using Markdown
 using InteractiveUtils
@@ -54,9 +54,6 @@ begin
 	# Star-to-planet radius ratio
 	get_RₚRₛ(; Rₚ, Rₛ) = Rₚ / Rₛ
 
-	# Planet radius
-	get_Rₚ(; RₚRₛ, Rₛ) =  RₚRₛ * Rₛ
-
 	# Semi-major axis / Star density
 	get_aRₛ(ρₛ::Unitful.Density, P::Unitful.Time) = ((G * P^2 * ρₛ)/(3.0π))^(1//3)
 	get_aRₛ(a::Unitful.Length, Rₛ::Unitful.Length) = a / Rₛ
@@ -80,8 +77,14 @@ begin
 	# Star temperature 
 	get_Tₛ(; Lₛ, Rₛ) = (L / (4.0π * Rₛ^2 * σ))^(1//4)
 
-	#Planet mass
+	# Planet mass
 	get_Mₚ(; K, i, P, Mₛ) = (K/sin(i)) * (P / (2.0π*G))^(1//3) * Mₛ^(2//3)
+	
+	# Planet radius
+	get_Rₚ(; RₚRₛ, Rₛ) =  RₚRₛ * Rₛ
+	
+	# Planet density
+	get_ρₚ(; Mₚ, Rₚ) = Mₚ / ((4.0/3.0)π * Rₚ^3)
 
 	# Star surface gravity
 	get_gₛ(; Mₛ, Rₛ) = G * Mₛ / Rₛ^2
@@ -378,6 +381,12 @@ function calculate_params(st::Study)
 		inputs_gₚ = (Mₚ=Mₚ, RₚRₛ=RₚRₛ, Rₛ=Rₛ)
 		gₚ = get_gₚ(; inputs_gₚ...)
 	end
+	if !isnothing(st.ρₚ)
+		ρₚ = st.ρₚ
+	else
+		inputs_ρₚ = (Mₚ=Mₚ, Rₚ=Rₚ)
+		ρₚ = get_ρₚ(; inputs_ρₚ...)
+	end
 
 	# Calculate signal
 	if isnothing(st.μ)
@@ -393,30 +402,31 @@ function calculate_params(st::Study)
 	# Store results
 	params = (
 		# Star Params
-		ρₛ	= ρₛ,
-		gₛ	= gₛ,
-		Mₛ	= Mₛ,
-		Rₛ	= Rₛ,
-		Tₛ	= Tₛ,
-		Lₛ  = Lₛ,
+		ρₛ	 = ρₛ,
+		gₛ	 = gₛ,
+		Mₛ	 = Mₛ,
+		Rₛ	 = Rₛ,
+		Tₛ	 = Tₛ,
+		Lₛ   = Lₛ,
 
 		#Orbital params
 		RₚRₛ = RₚRₛ,
-		P	= P,
-		aRₛ = aRₛ,
-		a = a,
-		K	= K,
-		i	= i,
-		b   = b,
+		P	 = P,
+		aRₛ  = aRₛ,
+		a    = a,
+		K	 = K,
+		i	 = i,
+		b    = b,
 
 		# Planet params
-		μ	= μ,
-		α	= α,
-		gₚ	= gₚ,
-		Mₚ	= Mₚ,
-		Rₚ	= Rₚ,
-		Tₚ	= Tₚ,
-		H	= H,
+		μ	 = μ,
+		α	 = α,
+		gₚ	 = gₚ,
+		Mₚ	 = Mₚ,
+		Rₚ	 = Rₚ,
+		ρₚ   = ρₚ,
+		Tₚ	 = Tₚ,
+		H	 = H,
 
 		# Signal
 		N_scales = st.N_scales,
@@ -425,30 +435,31 @@ function calculate_params(st::Study)
 	
 	params_inputs = (
 		# Star Params
-		inputs_ρₛ = inputs_ρₛ,
-		inputs_gₛ = inputs_gₛ,
-		inputs_Mₛ = inputs_Mₛ,
-		inputs_Rₛ = inputs_Rₛ,
-		inputs_Tₛ = inputs_Tₛ,
-		inputs_Lₛ = inputs_Lₛ,
+		inputs_ρₛ   = inputs_ρₛ,
+		inputs_gₛ   = inputs_gₛ,
+		inputs_Mₛ   = inputs_Mₛ,
+		inputs_Rₛ   = inputs_Rₛ,
+		inputs_Tₛ   = inputs_Tₛ,
+		inputs_Lₛ   = inputs_Lₛ,
 
 		#Orbital params
 		inputs_RₚRₛ = inputs_RₚRₛ,
-		inputs_P = inputs_P,
-		inputs_aRₛ = inputs_aRₛ,
-		inputs_a = inputs_a,
-		inputs_K = inputs_K,
-		inputs_i = inputs_i,
-		inputs_b = inputs_b,
+		inputs_P    = inputs_P,
+		inputs_aRₛ  = inputs_aRₛ,
+		inputs_a    = inputs_a,
+		inputs_K    = inputs_K,
+		inputs_i    = inputs_i,
+		inputs_b    = inputs_b,
 
 		# Planet params
-		inputs_μ = inputs_μ,
-		inputs_α = inputs_α,
-		inputs_gₚ = inputs_gₚ,
-		inputs_Mₚ = inputs_Mₚ,
-		inputs_Rₚ = inputs_Rₚ,
-		inputs_Tₚ = inputs_Tₚ,
-		inputs_H = inputs_H,
+		inputs_μ    = inputs_μ,
+		inputs_α    = inputs_α,
+		inputs_gₚ   = inputs_gₚ,
+		inputs_Mₚ   = inputs_Mₚ,
+		inputs_Rₚ   = inputs_Rₚ,
+		inputs_ρₚ   = inputs_ρₚ,
+		inputs_Tₚ   = inputs_Tₚ,
+		inputs_H    = inputs_H,
 	)
 	
 	return params, params_inputs;
@@ -485,6 +496,7 @@ md"### Structure to hold a summary of all parameters"
 	gₚ
 	Mₚ
 	Rₚ
+	ρₚ
 	Tₚ
 	H
 
@@ -524,6 +536,7 @@ md"### Structure to hold the inputs used to calculate each parameter"
 	inputs_gₚ
 	inputs_Mₚ
 	inputs_Rₚ
+	inputs_ρₚ
 	inputs_Tₚ
 	inputs_H
 end;
@@ -571,6 +584,7 @@ function display_summary(d::Derived, d_i::Derived_inputs)
 	α $(keys(d_i.inputs_α)) = $(uconvert(NoUnits, d.α)) \
 	Rₚ $(keys(d_i.inputs_Rₚ)) = $(uconvert(u"Rjup", d.Rₚ)) \
 	Mₚ $(keys(d_i.inputs_Mₚ)) = $(uconvert(u"Mjup", d.Mₚ)) \
+	ρₚ $(keys(d_i.inputs_ρₚ)) = $(uconvert(u"g/cm^3", d.ρₚ)) \
 	Tₚ $(keys(d_i.inputs_Tₚ)) = $(uconvert(u"K", d.Tₚ)) \
 	gₚ $(keys(d_i.inputs_gₚ)) = $(uconvert(u"m/s^2", d.gₚ)) \
 	H $(keys(d_i.inputs_H)) = $(uconvert(u"km", d.H))
