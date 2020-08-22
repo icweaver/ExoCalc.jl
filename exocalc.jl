@@ -470,7 +470,7 @@ function calculate_params(st::Study)
 	)
 	
 	return params, params_inputs;
-end
+end;
 
 # ╔═╡ a8df7ad0-dd9e-11ea-2a6a-f16683371016
 md"### Structure to hold a summary of all parameters"
