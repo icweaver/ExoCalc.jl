@@ -17,13 +17,17 @@ md"""
 """
 
 # ╔═╡ b2286b26-dac2-11ea-1ce0-c7da562aa641
-md"Given exoplanet and host star parameters from the literature, calculate derived values relevant for detection of the planet's atmosphere."
+md"""
+This calculator uses host star and orbital parameters from the literature to self-consistently calculate derived values used for estimating the observed signal (ΔD) produced by its planet's atmosphere.
+
+For proper rendering of unicode symbols, we recommend using either Chrome of Firefox to view this webpage. The source code for this page is available [here](https://github.com/icweaver/exocalc).
+"""
 
 # ╔═╡ 19b35ef4-dac3-11ea-2d25-97e5482ff6a0
 md"### Literature values"
 
 # ╔═╡ 07db65d6-dd99-11ea-103b-33d0317af127
-md"[Sources](https://exoplanetarchive.ipac.caltech.edu/overview/HAT-P-23%20b#legend)"
+md"Reference values from [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/cgi-bin/DisplayOverview/nph-DisplayOverview?objname=HAT-P-23%20b)"
 
 # ╔═╡ 7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 md"### Results"
