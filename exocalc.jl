@@ -47,11 +47,13 @@ The calculator first checks if there are missing input parameters and then calls
 
 Everything was done with a "star first" approach, meaning that all stellar parameters were determined first, and then the planet parameters were determined self-consistently from that. If conflicting parameters are given, the calculator will try to give priority to using direct observables to perform calculations and error otherwise. 
 
-For transparency, the inputs used for each calculation are show in parenthesis next to each parameter.
+For transparency, the inputs used for each calculation are shown in parenthesis next to each parameter.
 """
 
 # ╔═╡ 49f75dea-dda0-11ea-1a85-bbdd4750b878
-md"""These are the functions used to calculate each parameter based on the combination of inputs given. No `if` statements or default "`None`" keyword arguments needed thanks to Julia's multiple dispatch!"""
+md"""
+These are the functions used to calculate each parameter based on the combination of inputs given. No `if` statements or default "`None`" keyword arguments needed thanks to Julia's multiple dispatch! For convenience, these functions also return a string on the inputs used.
+"""
 
 # ╔═╡ 3f79c516-da77-11ea-1f6b-d3e7191a95d8
 begin
@@ -74,8 +76,7 @@ begin
 
 	# Star density
 	get_ρₛ(P::Unitful.Time, aRₛ::Measurement) =
-		(3.0π / (G * P^2)) * aRₛ^3,
-		"(P, aRₛ)"
+		(3.0π / (G * P^2)) * aRₛ^3, "(P, aRₛ)"
 	get_ρₛ(Mₛ::Unitful.Mass, Rₛ::Unitful.Length) =
 		Mₛ / ((4.0/3.0)π * Rₛ^3), "(Mₛ, Rₛ)"
 
@@ -115,10 +116,10 @@ begin
 end;
 
 # ╔═╡ c5c5ea28-dd9e-11ea-1f89-5b1371831177
-md"### Function to display the results"
+md"### Function displaying the results"
 
 # ╔═╡ 8e5811ae-dd9e-11ea-127e-b9812511492b
-md"### Structure used to hold the possible input parameters used by a study"
+md"### Structure holding input parameters used for a study"
 
 # ╔═╡ db28dbd2-db12-11ea-28e4-2b6cf30bd102
 @with_kw_noshow struct Study @deftype Union{Nothing, Quantity, Measurement}
@@ -316,58 +317,23 @@ function calculate_params(st::Study)
 	end
 
 	# Calculate remaining params if not given/calculated
-	if isnothing(st.i)
-		error("Must provide inclination (i).")
-	else
-		i, inputs_i = st.i, "(i)"
-	end
-	if isnothing(st.K)
-		error("Must provide RV semi-amplitude (K).")
-	else
-		K, inputs_K = st.K, "(K)"
-	end
-	if isnothing(st.α)
-		error("Must provide albedo (α).")
-	else
-		α, inputs_α = st.α, "(α)"
-	end
-	if !isnothing(st.b)
-		b, inputs_b = st.b, "(b)"
-	else
-		b, inputs_b = get_b(aRₛ, i)
-	end
-	if !isnothing(st.Mₚ)
-		Mₚ, inputs_Mₚ = st.Mₚ, "(Mₚ)"
-	else
-		Mₚ, inputs_Mₚ = get_Mₚ(K, i, P, Mₛ)
-	end
-	if !isnothing(st.Tₚ)
-		Tₚ, inputs_Tₚ = st.Tₚ, "(Tₚ)"
-	else
-		Tₚ, inputs_Tₚ = get_Tₚ(Tₛ, aRₛ, α)
-	end
-	if !isnothing(st.gₛ)
-		gₛ, inputs_gₛ = st.gₛ, "gₛ"
-	else
-		gₛ, inputs_gₛ = get_gₛ(Mₛ, Rₛ)
-	end
-	if !isnothing(st.gₚ)
-		gₚ, inputs_gₚ = st.gₚ, "(gₚ)"
-	else
-		gₚ, inputs_gₚ = get_gₚ(Mₚ, RₚRₛ, Rₛ)
-	end
-	if !isnothing(st.ρₚ)
-		ρₚ, inputs_ρₚ = st.ρₚ, "(ρₚ)"
-	else
-		ρₚ, inputs_ρₚ = get_ρₚ(Mₚ, Rₚ)
-	end
-
+	i, inputs_i   = 
+	!isnothing(st.i) ? (st.i, "(i)") : error("Must provide inclination (i).")
+	K, inputs_K   = 
+	!isnothing(st.K) ? (st.K, "(K)") : error("Must provide RV semi-amplitude (K).")
+	α, inputs_α   = 
+	!isnothing(st.α) ? (st.α, "(α)") : error("Must provide albedo (α).")
+	b,  inputs_b  = !isnothing(st.b)  ? (st.b, "(b)")   : get_b(aRₛ, i)
+	Mₚ, inputs_Mₚ = !isnothing(st.Mₚ) ? (st.Mₚ, "(Mₚ)") : get_Mₚ(K, i, P, Mₛ)
+	Tₚ, inputs_Tₚ = !isnothing(st.Tₚ) ? (st.Tₚ, "(Tₚ)") : get_Tₚ(Tₛ, aRₛ, α)
+	gₛ, inputs_gₛ = !isnothing(st.gₛ) ? (st.gₛ, "gₛ")   : get_gₛ(Mₛ, Rₛ)
+	gₚ, inputs_gₚ = !isnothing(st.gₚ) ? (st.gₚ, "(gₚ)") : get_gₚ(Mₚ, RₚRₛ, Rₛ)
+	ρₚ, inputs_ρₚ = !isnothing(st.ρₚ) ? (st.ρₚ, "(ρₚ)") : get_ρₚ(Mₚ, Rₚ)
+	μ, inputs_μ = 
+	!isnothing(st.μ) ? (st.μ, "(μ)") : 
+	error("Must provide mean molecula weight (μ).")
+	
 	# Calculate signal
-	if isnothing(st.μ)
-		error("Must provide mean molecula weight (μ).")
-	else
-		μ, inputs_μ = st.μ, "(μ)"
-	end
 	H, inputs_H  = get_H(μ, Tₚ, gₚ)
 	ΔD = get_ΔD(H, RₚRₛ, Rₛ)
 	
@@ -405,6 +371,7 @@ function calculate_params(st::Study)
 		ΔD	= ΔD,
 	)
 	
+	# Store inputs used
 	params_inputs = (
 		# Star Params
 		inputs_ρₛ   = inputs_ρₛ,
@@ -438,7 +405,7 @@ function calculate_params(st::Study)
 end;
 
 # ╔═╡ a8df7ad0-dd9e-11ea-2a6a-f16683371016
-md"### Structure to hold a summary of all parameters"
+md"### Structure holding summary of all parameters"
 
 # ╔═╡ bd752a9e-dd80-11ea-141c-779c5135d4d8
 @with_kw_noshow struct Derived @deftype Quantity
@@ -478,7 +445,7 @@ md"### Structure to hold a summary of all parameters"
 end;
 
 # ╔═╡ 855e7c4c-e0fe-11ea-1bbb-1b9db42a984d
-md"### Structure to hold the inputs used to calculate each parameter"
+md"### Structure holding inputs used in each calculation"
 
 # ╔═╡ 410f5804-e0ef-11ea-0576-e1692cd42b1b
 @with_kw_noshow struct Derived_inputs @deftype String
@@ -569,9 +536,6 @@ end;
 # ╔═╡ 4bfaf322-dbd9-11ea-0449-87d9aa07311f
 display_summary.(results, results_inputs)
 
-# ╔═╡ a6806058-e740-11ea-11e4-c526ddeb1065
-Derived_inputs(inputs_P = "hey")
-
 # ╔═╡ 7db94ad6-dda1-11ea-2f33-1da144f1b7ad
 md"Libraries for using things like physical constants and units."
 
@@ -598,7 +562,6 @@ md"Libraries for using things like physical constants and units."
 # ╟─a8df7ad0-dd9e-11ea-2a6a-f16683371016
 # ╠═bd752a9e-dd80-11ea-141c-779c5135d4d8
 # ╟─855e7c4c-e0fe-11ea-1bbb-1b9db42a984d
-# ╠═a6806058-e740-11ea-11e4-c526ddeb1065
 # ╠═410f5804-e0ef-11ea-0576-e1692cd42b1b
 # ╟─7db94ad6-dda1-11ea-2f33-1da144f1b7ad
 # ╠═02bfa078-d62b-11ea-15df-d701431829b9
