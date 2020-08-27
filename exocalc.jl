@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.8
+# v0.11.9
 
 using Markdown
 using InteractiveUtils
@@ -323,7 +323,7 @@ function calculate_params(st::Study)
 	!isnothing(st.K) ? (st.K, "(K)") : error("Must provide RV semi-amplitude (K).")
 	α, inputs_α   = 
 	!isnothing(st.α) ? (st.α, "(α)") : error("Must provide albedo (α).")
-	b,  inputs_b  = !isnothing(st.b)  ? (st.b, "(b)")   : get_b(aRₛ, i)
+	b,  inputs_b  = !isnothing(st.b)  ? (st.b, "(b)")   : get_b(i, aRₛ)
 	Mₚ, inputs_Mₚ = !isnothing(st.Mₚ) ? (st.Mₚ, "(Mₚ)") : get_Mₚ(K, i, P, Mₛ)
 	Tₚ, inputs_Tₚ = !isnothing(st.Tₚ) ? (st.Tₚ, "(Tₚ)") : get_Tₚ(Tₛ, aRₛ, α)
 	gₛ, inputs_gₛ = !isnothing(st.gₛ) ? (st.gₛ, "gₛ")   : get_gₛ(Mₛ, Rₛ)
