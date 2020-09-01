@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.9
+# v0.11.10
 
 using Markdown
 using InteractiveUtils
@@ -58,58 +58,58 @@ These are the functions used to calculate each parameter based on the combinatio
 # ╔═╡ 3f79c516-da77-11ea-1f6b-d3e7191a95d8
 begin
 	# Star radius
-	get_Rₛ(Lₛ, Tₛ) = (Lₛ / (4.0π*σ*Tₛ^4))^(1//2), "(Lₛ, Tₛ)"
+	get_Rₛ(Lₛ, Tₛ) = (Lₛ / (4.0π*σ*Tₛ^4))^(1//2), "Rₛ(Lₛ, Tₛ)"
 
 	# Star-to-planet radius ratio
-	get_RₚRₛ(Rₚ, Rₛ) = Rₚ / Rₛ, "(Rₚ, Rₛ)"
+	get_RₚRₛ(Rₚ, Rₛ) = Rₚ / Rₛ, "RₚRₛ(Rₚ, Rₛ)"
 
 	# Semi-major axis / Star density
 	get_aRₛ(ρₛ::Unitful.Density, P::Unitful.Time) =
-		((G * P^2 * ρₛ)/(3.0π))^(1//3), "(ρₛ, P)"
-	get_aRₛ(a::Unitful.Length, Rₛ::Unitful.Length) = a / Rₛ, "(a, Rₛ)"
+		((G * P^2 * ρₛ)/(3.0π))^(1//3), "aRₛ(ρₛ, P)"
+	get_aRₛ(a::Unitful.Length, Rₛ::Unitful.Length) = a / Rₛ, "aRₛ(a, Rₛ)"
 	
 	# Semi-major axis
-	get_a(aRₛ, Rₛ) = aRₛ * Rₛ, "aRₛ, Rₛ"
+    get_a(aRₛ, Rₛ) = aRₛ * Rₛ, "a(aRₛ, Rₛ)"
 	
 	# Impact parameter
-	get_b(i, aRₛ) = aRₛ * cos(i), "(i, aRₛ)"
+	get_b(i, aRₛ) = aRₛ * cos(i), "b(i, aRₛ)"
 
 	# Star density
 	get_ρₛ(P::Unitful.Time, aRₛ::Measurement) =
-		(3.0π / (G * P^2)) * aRₛ^3, "(P, aRₛ)"
+        (3.0π / (G * P^2)) * aRₛ^3, "ρₛ(P, aRₛ)"
 	get_ρₛ(Mₛ::Unitful.Mass, Rₛ::Unitful.Length) =
-		Mₛ / ((4.0/3.0)π * Rₛ^3), "(Mₛ, Rₛ)"
+		Mₛ / ((4.0/3.0)π * Rₛ^3), "ρₛ(Mₛ, Rₛ)"
 
 	# Star mass
-	get_Mₛ(ρₛ, Rₛ) = ρₛ * (4.0/3.0) * π * Rₛ^3.0, "(ρₛ, Rₛ)"
+	get_Mₛ(ρₛ, Rₛ) = ρₛ * (4.0/3.0) * π * Rₛ^3.0, "Mₛ(ρₛ, Rₛ)"
 
 	# Star luminosity
-	get_Lₛ(Tₛ, Rₛ) = 4.0π * Rₛ^2 * σ * Tₛ^4, "(Tₛ, Rₛ)"
+	get_Lₛ(Tₛ, Rₛ) = 4.0π * Rₛ^2 * σ * Tₛ^4, "Lₛ(Tₛ, Rₛ)"
 	
 	# Star temperature 
-	get_Tₛ(Lₛ, Rₛ) = (L / (4.0π * Rₛ^2 * σ))^(1//4), "(Lₛ, Rₛ)"
+	get_Tₛ(Lₛ, Rₛ) = (L / (4.0π * Rₛ^2 * σ))^(1//4), "Tₛ(Lₛ, Rₛ)"
 
 	# Planet mass
 	get_Mₚ(K, i, P, Mₛ) =
-		(K/sin(i)) * (P / (2.0π*G))^(1//3) * Mₛ^(2//3), "(K, i, P, Mₛ)"
+		(K/sin(i)) * (P / (2.0π*G))^(1//3) * Mₛ^(2//3), "Mₚ(K, i, P, Mₛ)"
 	
 	# Planet radius
-	get_Rₚ(RₚRₛ, Rₛ) =  RₚRₛ * Rₛ, "(RₚRₛ, Rₛ)"
+	get_Rₚ(RₚRₛ, Rₛ) =  RₚRₛ * Rₛ, "Rₚ(RₚRₛ, Rₛ)"
 	
 	# Planet density
-	get_ρₚ(Mₚ, Rₚ) = Mₚ / ((4.0/3.0)π * Rₚ^3), "(Mₚ, Rₚ)"
+	get_ρₚ(Mₚ, Rₚ) = Mₚ / ((4.0/3.0)π * Rₚ^3), "ρₚ(Mₚ, Rₚ)"
 
 	# Star surface gravity
-	get_gₛ(Mₛ, Rₛ) = G * Mₛ / Rₛ^2, "(Mₛ, Rₛ)"
+	get_gₛ(Mₛ, Rₛ) = G * Mₛ / Rₛ^2, "gₛ(Mₛ, Rₛ)"
 
 	# Planet surface gravity
-	get_gₚ(Mₚ, RₚRₛ, Rₛ) = G * Mₚ / (RₚRₛ^2 * Rₛ^2), "(Mₚ, RₚRₛ, Rₛ)"
+	get_gₚ(Mₚ, RₚRₛ, Rₛ) = G * Mₚ / (RₚRₛ^2 * Rₛ^2), "gₚ(Mₚ, RₚRₛ, Rₛ)"
 
 	# Planet equilibrium temperature
-	get_Tₚ(Tₛ, aRₛ, α) = Tₛ * (1.0 - α)^(1//4) * (0.5/aRₛ)^(1//2), "(Tₛ, aRₛ, α)"
+	get_Tₚ(Tₛ, aRₛ, α) = Tₛ * (1.0 - α)^(1//4) * (0.5/aRₛ)^(1//2), "Tₚ(Tₛ, aRₛ, α)"
 
 	# Planet scale height
-	get_H(μ, Tₚ, gₚ) = k * Tₚ / (μ * gₚ), "(μ, Tₚ, gₚ)"
+	get_H(μ, Tₚ, gₚ) = k * Tₚ / (μ * gₚ), "H(μ, Tₚ, gₚ)"
 
 	# Estimated signal from planet atmosphere
 	get_ΔD(H, RₚRₛ, Rₛ) = 2.0 * H * RₚRₛ/Rₛ
@@ -243,16 +243,16 @@ studies = [
 function calculate_params(st::Study)
 	# Rₛ, Tₛ, Lₛ
 	if !isnothing(st.Rₛ)
-		Rₛ, inputs_Rₛ = st.Rₛ, "(Rₛ)"
+		Rₛ, inputs_Rₛ = st.Rₛ, "Rₛ(Rₛ)"
 		if any((!isnothing).([st.Tₛ, st.Lₛ]))
 			if all((!isnothing).([st.Tₛ, st.Lₛ]))
-				Lₛ, inputs_Lₛ = st.Lₛ, "(Lₛ)"
-				Tₛ, inputs_Tₛ = st.Tₛ, "(Tₛ)"
+				Lₛ, inputs_Lₛ = st.Lₛ, "Lₛ(Lₛ)"
+				Tₛ, inputs_Tₛ = st.Tₛ, "Tₛ(Tₛ)"
 			elseif isnothing(st.Tₛ)
-				Lₛ, inputs_Lₛ = st.Lₛ, "(Lₛ)"
+				Lₛ, inputs_Lₛ = st.Lₛ, "Lₛ(Lₛ)"
 				Tₛ, inputs_Tₛ = get_Tₛ(Lₛ, Rₛ)
 			else
-				Tₛ, inputs_Tₛ = st.Tₛ, "(Tₛ)"
+				Tₛ, inputs_Tₛ = st.Tₛ, "Tₛ(Tₛ)"
 				Lₛ, inputs_Lₛ = get_Lₛ(Tₛ, Rₛ)
 			end
 		else
@@ -260,8 +260,8 @@ function calculate_params(st::Study)
 		end
 	else
 		if all((!isnothing).([st.Lₛ, st.Tₛ]))
-			Lₛ, inputs_Lₛ = st.Lₛ, "(Lₛ)"
-			Tₛ, inputs_Tₛ = st.Tₛ, "(Tₛ)"
+			Lₛ, inputs_Lₛ = st.Lₛ, "Lₛ(Lₛ)"
+			Tₛ, inputs_Tₛ = st.Tₛ, "Tₛ(Tₛ)"
 			Rₛ, inputs_Rₛ = get_Rₛ(Lₛ, Tₛ)
 		else
 			error("Rₛ was not given. Lₛ and Tₛ must be given then.")
@@ -270,10 +270,10 @@ function calculate_params(st::Study)
 
 	# RₚRₛ and Rₚ
 	if !isnothing(st.Rₚ)
-		Rₚ, inputs_Rₚ = st.Rₚ, "(Rₚ)"
+		Rₚ, inputs_Rₚ = st.Rₚ, "Rₚ(Rₚ)"
 		RₚRₛ, inputs_RₚRₛ = get_RₚRₛ(Rₚ, Rₛ)
 	elseif !isnothing(st.RₚRₛ)
-		RₚRₛ, inputs_RₚRₛ = st.RₚRₛ, "(RₚRₛ)"
+		RₚRₛ, inputs_RₚRₛ = st.RₚRₛ, "RₚRₛ(RₚRₛ)"
 		Rₚ, inputs_Rₚ = get_Rₚ(RₚRₛ, Rₛ)
 	else
 		error("Please specify either RₚRₛ or Rₚ.")
@@ -281,7 +281,7 @@ function calculate_params(st::Study)
 
 	# P
 	if !isnothing(st.P)
-		P, inputs_P = st.P, "(P)"
+		P, inputs_P = st.P, "P(P)"
 	else
 		error("Please specify a period.")
 	end
@@ -294,15 +294,15 @@ function calculate_params(st::Study)
 		error("Conflicting inputs. Only aRₛ or b can be given.")
 	end
 	if !isnothing(st.ρₛ)
-		ρₛ, inputs_ρₛ = st.ρₛ, "(ρₛ)"
+		ρₛ, inputs_ρₛ = st.ρₛ, "ρₛ(ρₛ)"
 		aRₛ, inputs_aRₛ = get_aRₛ(ρₛ, P)
 		a, inputs_a = get_a(aRₛ, Rₛ)
 	elseif !isnothing(st.aRₛ)
-		aRₛ, inputs_aRₛ = st.aRₛ, "(aRₛ)"
+		aRₛ, inputs_aRₛ = st.aRₛ, "aRₛ(aRₛ)"
 		a, inputs_a = get_a(aRₛ, Rₛ)
 		ρₛ, inputs_ρₛ = get_ρₛ(P, aRₛ)
 	elseif !isnothing(st.a)
-		a, inputs_a = st.a, "(a)"
+		a, inputs_a = st.a, "a(a)"
 		aRₛ, inputs_aRₛ = get_aRₛ(a, Rₛ)
 		ρₛ, inputs_ρₛ = get_ρₛ(P, aRₛ)
 	else
@@ -311,26 +311,26 @@ function calculate_params(st::Study)
 
 	# Mₛ
 	if !isnothing(st.Mₛ)
-		Mₛ, inputs_Mₛ = st.Mₛ, "(Mₛ)"
+		Mₛ, inputs_Mₛ = st.Mₛ, "Mₛ(Mₛ)"
 	else
 		Mₛ, inputs_Mₛ = get_Mₛ(ρₛ, Rₛ)
 	end
 
 	# Calculate remaining params if not given/calculated
 	i, inputs_i   = 
-	!isnothing(st.i) ? (st.i, "(i)") : error("Must provide inclination (i).")
+	!isnothing(st.i) ? (st.i, "i(i)") : error("Must provide inclination (i).")
 	K, inputs_K   = 
-	!isnothing(st.K) ? (st.K, "(K)") : error("Must provide RV semi-amplitude (K).")
+	!isnothing(st.K) ? (st.K, "K(K)") : error("Must provide RV semi-amplitude (K).")
 	α, inputs_α   = 
-	!isnothing(st.α) ? (st.α, "(α)") : error("Must provide albedo (α).")
-	b,  inputs_b  = !isnothing(st.b)  ? (st.b, "(b)")   : get_b(i, aRₛ)
-	Mₚ, inputs_Mₚ = !isnothing(st.Mₚ) ? (st.Mₚ, "(Mₚ)") : get_Mₚ(K, i, P, Mₛ)
-	Tₚ, inputs_Tₚ = !isnothing(st.Tₚ) ? (st.Tₚ, "(Tₚ)") : get_Tₚ(Tₛ, aRₛ, α)
-	gₛ, inputs_gₛ = !isnothing(st.gₛ) ? (st.gₛ, "gₛ")   : get_gₛ(Mₛ, Rₛ)
-	gₚ, inputs_gₚ = !isnothing(st.gₚ) ? (st.gₚ, "(gₚ)") : get_gₚ(Mₚ, RₚRₛ, Rₛ)
-	ρₚ, inputs_ρₚ = !isnothing(st.ρₚ) ? (st.ρₚ, "(ρₚ)") : get_ρₚ(Mₚ, Rₚ)
+	!isnothing(st.α) ? (st.α, "α(α)") : error("Must provide albedo (α).")
+	b,  inputs_b  = !isnothing(st.b)  ? (st.b, "b(b)")   : get_b(i, aRₛ)
+	Mₚ, inputs_Mₚ = !isnothing(st.Mₚ) ? (st.Mₚ, "Mₚ(Mₚ)") : get_Mₚ(K, i, P, Mₛ)
+	Tₚ, inputs_Tₚ = !isnothing(st.Tₚ) ? (st.Tₚ, "Tₚ(Tₚ)") : get_Tₚ(Tₛ, aRₛ, α)
+    gₛ, inputs_gₛ = !isnothing(st.gₛ) ? (st.gₛ, "gₛ(gₛ)")   : get_gₛ(Mₛ, Rₛ)
+	gₚ, inputs_gₚ = !isnothing(st.gₚ) ? (st.gₚ, "gₚ(gₚ)") : get_gₚ(Mₚ, RₚRₛ, Rₛ)
+	ρₚ, inputs_ρₚ = !isnothing(st.ρₚ) ? (st.ρₚ, "ρₚ(ρₚ)") : get_ρₚ(Mₚ, Rₚ)
 	μ, inputs_μ = 
-	!isnothing(st.μ) ? (st.μ, "(μ)") : 
+	!isnothing(st.μ) ? (st.μ, "μ(μ)") :
 	error("Must provide mean molecula weight (μ).")
 	
 	# Calculate signal
@@ -502,31 +502,30 @@ function display_summary(d::Derived, d_i::Derived_inputs)
 	md"""
 	###### **$(d.name):**
 	**Star Params** \
-	Rₛ $(d_i.inputs_Rₛ) = $(uconvert(u"Rsun", d.Rₛ)) \
-	Mₛ $(d_i.inputs_Mₛ) = $(uconvert(u"Msun", d.Mₛ)) \
-	Tₛ $(d_i.inputs_Tₛ) = $(uconvert(u"K", d.Tₛ)) \
-	Lₛ $(d_i.inputs_Lₛ) = $(uconvert(u"Lsun", d.Lₛ)) \
-	ρₛ $(d_i.inputs_ρₛ) = $(uconvert(u"g/cm^3", d.ρₛ)) \
-	log gₛ (cm/s²) $(d_i.inputs_gₛ) =
-	$(log10(ustrip(uconvert(u"cm/s^2", d.gₛ))))
+	$(d_i.inputs_Rₛ) = $(uconvert(u"Rsun", d.Rₛ)) \
+	$(d_i.inputs_Mₛ) = $(uconvert(u"Msun", d.Mₛ)) \
+	$(d_i.inputs_Tₛ) = $(uconvert(u"K", d.Tₛ)) \
+	$(d_i.inputs_Lₛ) = $(uconvert(u"Lsun", d.Lₛ)) \
+	$(d_i.inputs_ρₛ) = $(uconvert(u"g/cm^3", d.ρₛ)) \
+	$(d_i.inputs_gₛ)(cm/s²) = $(log10(ustrip(uconvert(u"cm/s^2", d.gₛ))))
 	
 	**Orbital params** \
-	K $(d_i.inputs_K) = $(uconvert(u"m/s", d.K)) \
-	i $(d_i.inputs_i) = $(uconvert(u"°", d.i)) \
-	RₚRₛ $(d_i.inputs_RₚRₛ) = $(uconvert(NoUnits, d.RₚRₛ)) \
-	aRₛ $(d_i.inputs_aRₛ) = $(uconvert(NoUnits, d.aRₛ)) \
-	P $(d_i.inputs_P) = $(uconvert(u"d", d.P)) \
-	b $(d_i.inputs_b) = $(d.b)
+	$(d_i.inputs_K) = $(uconvert(u"m/s", d.K)) \
+	$(d_i.inputs_i) = $(uconvert(u"°", d.i)) \
+	$(d_i.inputs_RₚRₛ) = $(uconvert(NoUnits, d.RₚRₛ)) \
+	$(d_i.inputs_aRₛ) = $(uconvert(NoUnits, d.aRₛ)) \
+	$(d_i.inputs_P) = $(uconvert(u"d", d.P)) \
+	$(d_i.inputs_b) = $(d.b)
 
 	**Planet params** \
-	μ $(d_i.inputs_μ) = $(uconvert(u"u", d.μ)) \
-	α $(d_i.inputs_α) = $(uconvert(NoUnits, d.α)) \
-	Rₚ $(d_i.inputs_Rₚ) = $(uconvert(u"Rjup", d.Rₚ)) \
-	Mₚ $(d_i.inputs_Mₚ) = $(uconvert(u"Mjup", d.Mₚ)) \
-	ρₚ $(d_i.inputs_ρₚ) = $(uconvert(u"g/cm^3", d.ρₚ)) \
-	Tₚ $(d_i.inputs_Tₚ) = $(uconvert(u"K", d.Tₚ)) \
-	gₚ $(d_i.inputs_gₚ) = $(uconvert(u"m/s^2", d.gₚ)) \
-	H $(d_i.inputs_H) = $(uconvert(u"km", d.H))
+	$(d_i.inputs_μ) = $(uconvert(u"u", d.μ)) \
+	$(d_i.inputs_α) = $(uconvert(NoUnits, d.α)) \
+	$(d_i.inputs_Rₚ) = $(uconvert(u"Rjup", d.Rₚ)) \
+	$(d_i.inputs_Mₚ) = $(uconvert(u"Mjup", d.Mₚ)) \
+	$(d_i.inputs_ρₚ) = $(uconvert(u"g/cm^3", d.ρₚ)) \
+	$(d_i.inputs_Tₚ) = $(uconvert(u"K", d.Tₚ)) \
+	$(d_i.inputs_gₚ) = $(uconvert(u"m/s^2", d.gₚ)) \
+	$(d_i.inputs_H) = $(uconvert(u"km", d.H))
 
 	**Signal at $(d.N_scales) scale heights** \
 	ΔD = $(d.N_scales * uconvert(NoUnits, d.ΔD) * 1e6) ppm
