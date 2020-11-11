@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.6
+# v0.12.8
 
 using Markdown
 using InteractiveUtils
@@ -28,6 +28,12 @@ md"### Literature values"
 
 # ╔═╡ 07db65d6-dd99-11ea-103b-33d0317af127
 md"Reference values from [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/cgi-bin/DisplayOverview/nph-DisplayOverview?objname=HAT-P-23%20b)"
+
+# ╔═╡ 9201da6c-237e-11eb-1f3a-0173530d0014
+begin
+	import DarkMode
+	DarkMode.enable()
+end
 
 # ╔═╡ 7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 md"### Results"
@@ -206,7 +212,7 @@ studies = [
 		RₚRₛ = 0.1113 ± 0.0010,
 		Tₛ	 = (5905.0 ± 80.0)u"K",
 		ρₛ	 = (0.92 ± 0.18)u"g/cm^3",
-		Rₛ	 = (0.960±0.200)u"Rsun",
+		Rₛ	 = (0.960 ± 0.200)u"Rsun",
 	),
 	Study(
 		name = "HAT-P-23/b: GAIA DR2",
@@ -236,6 +242,30 @@ studies = [
 		Mₛ = (1.078000 ± 0.136618)u"Msun",
 		Lₛ = (10.0^(0.1661873 ± 0.0191600))u"Lsun",
 		gₛ = (10.0^(4.3479600 ± 0.0819789))u"cm/s^2",
+	),
+	Study(
+		name = "HAT-P-23/b: Set 1 (Gaia DR1)",
+		μ	 = 2.0*amu,
+		α	 = 0.0 ± 0.0,
+		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
+		i	 = (83.6 ± 0.3)u"°",
+		P	 = (1.21289 ± 3.73975e-8)u"d",
+		RₚRₛ = 0.11390 ± 0.0010,
+		Tₛ	 = (5905.0 ± 80.0)u"K", # GAIA DR1
+		ρₛ = (1.016 ± 0.0286)u"g/cm^3",
+		Rₛ	 = (0.960 ± 0.200)u"Rsun", # GAIA DR1
+	),
+	Study(
+		name = "HAT-P-23/b: Set 2 (TICv8)",
+		μ	 = 2.0*amu,
+		α	 = 0.0 ± 0.0,
+		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
+		i	 = (83.6 ± 0.3)u"°",
+		P	 = (1.21289 ± 3.73975e-8)u"d",
+		RₚRₛ = 0.11390 ± 0.0010,
+		Tₛ	 = (5905.0 ± 80.0)u"K", # GAIA DR1
+		ρₛ = (1.016 ± 0.0286)u"g/cm^3",
+		Rₛ	 = (1.1517600 ± 0.0596583)u"Rsun",
 	),
 ];
 
@@ -543,6 +573,7 @@ md"Libraries for using things like physical constants and units."
 # ╟─b2286b26-dac2-11ea-1ce0-c7da562aa641
 # ╟─19b35ef4-dac3-11ea-2d25-97e5482ff6a0
 # ╟─07db65d6-dd99-11ea-103b-33d0317af127
+# ╠═9201da6c-237e-11eb-1f3a-0173530d0014
 # ╠═17302d74-d63b-11ea-3de3-49f0df0554ca
 # ╟─7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 # ╟─a35f2936-e41d-11ea-3bdc-3b347410a558
