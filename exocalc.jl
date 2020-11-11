@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.8
+# v0.12.9
 
 using Markdown
 using InteractiveUtils
@@ -124,6 +124,13 @@ end;
 # ╔═╡ c5c5ea28-dd9e-11ea-1f89-5b1371831177
 md"### Function displaying the results"
 
+# ╔═╡ 33d8501e-2445-11eb-2c79-35db13d2dd8e
+function rnd(x; d=5, u=unit(x))
+	val = round(u, Measurements.value(x); digits=d)
+	unc = round(u, Measurements.uncertainty(x); digits=d)
+	"$(ustrip(val)) ± $unc"
+end
+
 # ╔═╡ 8e5811ae-dd9e-11ea-127e-b9812511492b
 md"### Structure holding input parameters used for a study"
 
@@ -245,27 +252,35 @@ studies = [
 	),
 	Study(
 		name = "HAT-P-23/b: Set 1 (Gaia DR1)",
-		μ	 = 2.0*amu,
-		α	 = 0.0 ± 0.0,
-		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
+		
+		# Weaver et al. (2020)
 		i	 = (83.6 ± 0.3)u"°",
 		P	 = (1.21289 ± 3.73975e-8)u"d",
 		RₚRₛ = 0.11390 ± 0.0010,
-		Tₛ	 = (5905.0 ± 80.0)u"K", # GAIA DR1
 		ρₛ = (1.016 ± 0.0286)u"g/cm^3",
+		
+		# Literature/Fixed parameter inputs
+		μ	 = 2.0*amu,
+		α	 = 0.0 ± 0.0,
+		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
+		Tₛ	 = (5905.0 ± 80.0)u"K", # GAIA DR1
 		Rₛ	 = (0.960 ± 0.200)u"Rsun", # GAIA DR1
 	),
 	Study(
 		name = "HAT-P-23/b: Set 2 (TICv8)",
-		μ	 = 2.0*amu,
-		α	 = 0.0 ± 0.0,
-		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
+		
+		# Weaver et al. (2020)
 		i	 = (83.6 ± 0.3)u"°",
 		P	 = (1.21289 ± 3.73975e-8)u"d",
 		RₚRₛ = 0.11390 ± 0.0010,
-		Tₛ	 = (5905.0 ± 80.0)u"K", # GAIA DR1
 		ρₛ = (1.016 ± 0.0286)u"g/cm^3",
-		Rₛ	 = (1.1517600 ± 0.0596583)u"Rsun",
+		
+		# Literature/Fixed parameter inputs
+		μ	 = 2.0*amu,
+		α	 = 0.0 ± 0.0,
+		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
+		Tₛ	 = (5905.0 ± 80.0)u"K", # TICv8
+		Rₛ	 = (1.1517600 ± 0.0596583)u"Rsun", # TICv8
 	),
 ];
 
@@ -532,30 +547,30 @@ function display_summary(d::Derived, d_i::Derived_inputs)
 	md"""
 	###### **$(d.name):**
 	**Star Params** \
-	$(d_i.inputs_Rₛ) = $(uconvert(u"Rsun", d.Rₛ)) \
-	$(d_i.inputs_Mₛ) = $(uconvert(u"Msun", d.Mₛ)) \
-	$(d_i.inputs_Tₛ) = $(uconvert(u"K", d.Tₛ)) \
-	$(d_i.inputs_Lₛ) = $(uconvert(u"Lsun", d.Lₛ)) \
-	$(d_i.inputs_ρₛ) = $(uconvert(u"g/cm^3", d.ρₛ)) \
+	$(d_i.inputs_Rₛ) = $(rnd((uconvert(u"Rsun", d.Rₛ)))) \
+	$(d_i.inputs_Mₛ) = $(rnd((uconvert(u"Msun", d.Mₛ)))) \
+	$(d_i.inputs_Tₛ) = $(rnd((uconvert(u"K", d.Tₛ)))) \
+	$(d_i.inputs_Lₛ) = $(rnd((uconvert(u"Lsun", d.Lₛ)))) \
+	$(d_i.inputs_ρₛ) = $(rnd((uconvert(u"g/cm^3", d.ρₛ)))) \
 	$(d_i.inputs_gₛ)(cm/s²) = $(log10(ustrip(uconvert(u"cm/s^2", d.gₛ))))
 	
 	**Orbital params** \
-	$(d_i.inputs_K) = $(uconvert(u"m/s", d.K)) \
-	$(d_i.inputs_i) = $(uconvert(u"°", d.i)) \
+	$(d_i.inputs_K) = $(rnd((uconvert(u"m/s", d.K)))) \
+	$(d_i.inputs_i) = $(rnd((uconvert(u"°", d.i)))) \
 	$(d_i.inputs_RₚRₛ) = $(uconvert(NoUnits, d.RₚRₛ)) \
 	$(d_i.inputs_aRₛ) = $(uconvert(NoUnits, d.aRₛ)) \
-	$(d_i.inputs_P) = $(uconvert(u"d", d.P)) \
+	$(d_i.inputs_P) = $(rnd((uconvert(u"d", d.P)))) \
 	$(d_i.inputs_b) = $(d.b)
 
 	**Planet params** \
 	$(d_i.inputs_μ) = $(uconvert(u"u", d.μ)) \
 	$(d_i.inputs_α) = $(uconvert(NoUnits, d.α)) \
-	$(d_i.inputs_Rₚ) = $(uconvert(u"Rjup", d.Rₚ)) \
-	$(d_i.inputs_Mₚ) = $(uconvert(u"Mjup", d.Mₚ)) \
-	$(d_i.inputs_ρₚ) = $(uconvert(u"g/cm^3", d.ρₚ)) \
-	$(d_i.inputs_Tₚ) = $(uconvert(u"K", d.Tₚ)) \
-	$(d_i.inputs_gₚ) = $(uconvert(u"m/s^2", d.gₚ)) \
-	$(d_i.inputs_H) = $(uconvert(u"km", d.H))
+	$(d_i.inputs_Rₚ) = $(rnd((uconvert(u"Rjup", d.Rₚ)))) \
+	$(d_i.inputs_Mₚ) = $(rnd((uconvert(u"Mjup", d.Mₚ)))) \
+	$(d_i.inputs_ρₚ) = $(rnd(uconvert(u"g/cm^3", d.ρₚ)))) \
+	$(d_i.inputs_Tₚ) = $(rnd(uconvert(u"K", d.Tₚ)))) \
+	$(d_i.inputs_gₚ) = $(rnd((uconvert(u"m/s^2", d.gₚ)))) \
+	$(d_i.inputs_H) = $(rnd((uconvert(u"km", d.H))))
 
 	**Signal at $(d.N_scales) scale heights** \
 	ΔD = $(d.N_scales * uconvert(NoUnits, d.ΔD) * 1e6) ppm
@@ -586,6 +601,7 @@ md"Libraries for using things like physical constants and units."
 # ╟─49f75dea-dda0-11ea-1a85-bbdd4750b878
 # ╠═3f79c516-da77-11ea-1f6b-d3e7191a95d8
 # ╟─c5c5ea28-dd9e-11ea-1f89-5b1371831177
+# ╠═33d8501e-2445-11eb-2c79-35db13d2dd8e
 # ╠═33fc58d0-dbd9-11ea-3c45-83f4b5a2a818
 # ╟─8e5811ae-dd9e-11ea-127e-b9812511492b
 # ╠═db28dbd2-db12-11ea-28e4-2b6cf30bd102
