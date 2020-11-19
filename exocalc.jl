@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.9
+# v0.12.10
 
 using Markdown
 using InteractiveUtils
@@ -182,7 +182,7 @@ studies = [
 		Mₛ	 = (0.717 ± 0.025)u"Msun",
 		Tₚ	 = (1440.0 ± 40.0)u"K",
 		Mₚ	 = (2.052 ± 0.053)u"Mjup",
-		K = (551.7 ± 4.7)u"m/s",
+		K    = (551.7 ± 4.7)u"m/s",
 		Rₚ	 =	(1.036 ± 0.012)u"Rjup",
 	),
 	Study(
@@ -214,7 +214,7 @@ studies = [
 		μ	 = 2.0*amu,
 		α	 = 0.0 ± 0.0,
 		K	 = (368.5 ± 17.6)u"m/s",
-		i	 = (85.1 ± 1.5)u"°",  # latest RV data, from B17
+		i	 = (85.1 ± 1.5)u"°",
 		P	 = (1.212880 ± 0.000002)u"d",
 		RₚRₛ = 0.1113 ± 0.0010,
 		Tₛ	 = (5905.0 ± 80.0)u"K",
@@ -225,7 +225,7 @@ studies = [
 		name = "HAT-P-23/b: GAIA DR2",
 		μ	 = 2.0*amu,
 		α	 = 0.0 ± 0.0,
-		K	 = (346.0 ± 21)u"m/s", # latest RV data, from B17
+		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
 		i	 = (85.1 ± 1.5)u"°",  # latest RV data, from B17
 		P	 = (1.2128867 ± 0.0000002)u"d", # latest transit data: (S&R16)
 		RₚRₛ = 0.1113 ± 0.0010, # latest transit data: (S&R16)
@@ -245,10 +245,10 @@ studies = [
 		RₚRₛ = 0.1113 ± 0.0010, # latest transit data: (S&R16)
 		Tₛ	 = (5918.230 ± 136.811)u"K",
 		Rₛ	 = (1.1517600 ± 0.0596583)u"Rsun",
-		ρₛ = (0.99471000 ± 0.23240140)u"g/cm^3",
-		Mₛ = (1.078000 ± 0.136618)u"Msun",
-		Lₛ = (10.0^(0.1661873 ± 0.0191600))u"Lsun",
-		gₛ = (10.0^(4.3479600 ± 0.0819789))u"cm/s^2",
+		ρₛ   = (0.99471000 ± 0.23240140)u"g/cm^3",
+		Mₛ   = (1.078000 ± 0.136618)u"Msun",
+		Lₛ   = (10.0^(0.1661873 ± 0.0191600))u"Lsun",
+		gₛ   = (10.0^(4.3479600 ± 0.0819789))u"cm/s^2",
 	),
 	Study(
 		name = "HAT-P-23/b: Set 1 (Gaia DR1)",
@@ -257,7 +257,7 @@ studies = [
 		i	 = (83.6 ± 0.3)u"°",
 		P	 = (1.21289 ± 3.73975e-8)u"d",
 		RₚRₛ = 0.11390 ± 0.0010,
-		ρₛ = (1.016 ± 0.0286)u"g/cm^3",
+		ρₛ   = (1.016 ± 0.0286)u"g/cm^3",
 		
 		# Literature/Fixed parameter inputs
 		μ	 = 2.0*amu,
@@ -273,13 +273,13 @@ studies = [
 		i	 = (83.6 ± 0.3)u"°",
 		P	 = (1.21289 ± 3.73975e-8)u"d",
 		RₚRₛ = 0.11390 ± 0.0010,
-		ρₛ = (1.016 ± 0.0286)u"g/cm^3",
+		ρₛ   = (1.016 ± 0.0286)u"g/cm^3",
 		
 		# Literature/Fixed parameter inputs
 		μ	 = 2.0*amu,
 		α	 = 0.0 ± 0.0,
 		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
-		Tₛ	 = (5905.0 ± 80.0)u"K", # TICv8
+		Tₛ	 = (5918.230 ± 136.811)u"K", # TICv8
 		Rₛ	 = (1.1517600 ± 0.0596583)u"Rsun", # TICv8
 	),
 ];
