@@ -29,12 +29,6 @@ md"### Literature values"
 # ╔═╡ 07db65d6-dd99-11ea-103b-33d0317af127
 md"Reference values from [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/cgi-bin/DisplayOverview/nph-DisplayOverview?objname=HAT-P-23%20b)"
 
-# ╔═╡ 9201da6c-237e-11eb-1f3a-0173530d0014
-begin
-	import DarkMode
-	DarkMode.enable()
-end
-
 # ╔═╡ 7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 md"### Results"
 
@@ -588,7 +582,6 @@ md"Libraries for using things like physical constants and units."
 # ╟─b2286b26-dac2-11ea-1ce0-c7da562aa641
 # ╟─19b35ef4-dac3-11ea-2d25-97e5482ff6a0
 # ╟─07db65d6-dd99-11ea-103b-33d0317af127
-# ╠═9201da6c-237e-11eb-1f3a-0173530d0014
 # ╠═17302d74-d63b-11ea-3de3-49f0df0554ca
 # ╟─7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 # ╟─a35f2936-e41d-11ea-3bdc-3b347410a558
