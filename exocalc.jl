@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.10
+# v0.12.15
 
 using Markdown
 using InteractiveUtils
@@ -34,6 +34,36 @@ md"### Results"
 
 # ╔═╡ a35f2936-e41d-11ea-3bdc-3b347410a558
 md"Scroll to see more results"
+
+# ╔═╡ b811deb4-3438-11eb-1eab-71f75a161537
+md"### Change in equilibrium temperature investigation"
+
+# ╔═╡ f80ed4c0-3433-11eb-388b-b19aba4e2d93
+md"""
+```math
+\begin{align}
+T_\text{eq} &= T_\star\sqrt{\frac{R_\star}{2a}}(1 - \alpha)^{1/4}\quad, \\
+\Delta T_\text{eq} &= T_\text{eq}^{(1)}\left(
+	\frac{T_\star^{(2)}}{T_\star^{(1)}}
+	\sqrt{\frac{R_\star^{(2)}}{R_\star^{(1)}}}
+	- 1
+\right)
+\end{align}
+```
+"""
+
+# ╔═╡ 62f44e74-3435-11eb-321d-7d11235a6637
+ΔTeq(;Teq₁, Tstar₁, Rstar₁, Tstar₂, Rstar₂) = 
+	Teq₁*((Tstar₂/Tstar₁)*√(Rstar₂/Rstar₁) - 1.0)
+
+# ╔═╡ f5ff1990-3435-11eb-0798-bd18fd65de2c
+ΔTeq(
+	Teq₁ = 2016.0,
+	Tstar₁ = 5905.0,
+	Rstar₁ = 0.96,
+	Tstar₂ = 5918.23,
+	Rstar₂ = 1.15176,
+)
 
 # ╔═╡ 38a61304-e0fe-11ea-14b2-17d9b9e13c7b
 md"### Calculate parameters"
@@ -259,6 +289,7 @@ studies = [
 		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
 		Tₛ	 = (5905.0 ± 80.0)u"K", # GAIA DR1
 		Rₛ	 = (0.960 ± 0.200)u"Rsun", # GAIA DR1
+		#ρₛ	 = (0.92 ± 0.18)u"g/cm^3", # GAIA DR1
 	),
 	Study(
 		name = "HAT-P-23/b: Set 2 (TICv8)",
@@ -275,6 +306,8 @@ studies = [
 		K	 = (346.0 ± 21.0)u"m/s", # latest RV data, from B17
 		Tₛ	 = (5918.230 ± 136.811)u"K", # TICv8
 		Rₛ	 = (1.1517600 ± 0.0596583)u"Rsun", # TICv8
+		#ρₛ   = (0.99471000 ± 0.23240140)u"g/cm^3", # TICv8
+		
 	),
 ];
 
@@ -586,6 +619,10 @@ md"Libraries for using things like physical constants and units."
 # ╟─7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 # ╟─a35f2936-e41d-11ea-3bdc-3b347410a558
 # ╠═4bfaf322-dbd9-11ea-0449-87d9aa07311f
+# ╟─b811deb4-3438-11eb-1eab-71f75a161537
+# ╟─f80ed4c0-3433-11eb-388b-b19aba4e2d93
+# ╟─62f44e74-3435-11eb-321d-7d11235a6637
+# ╠═f5ff1990-3435-11eb-0798-bd18fd65de2c
 # ╟─38a61304-e0fe-11ea-14b2-17d9b9e13c7b
 # ╠═3833772c-d63f-11ea-09b5-f36d68e512ea
 # ╟─0b6821a4-dac3-11ea-27d7-911521f0d3c0
