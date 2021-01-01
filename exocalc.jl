@@ -1,12 +1,14 @@
 ### A Pluto.jl notebook ###
-# v0.12.15
+# v0.12.18
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 02bfa078-d62b-11ea-15df-d701431829b9
 begin
-	using Measurements, Unitful, UnitfulAstro, Parameters, Markdown
+	using Unitful
+	using Unitful: Mass, Length, Time, Temperature, Density, Luminosity, Acceleration, Velocity
+	using Measurements, UnitfulAstro, Parameters, Markdown
 	using PhysicalConstants.CODATA2018: G, k_B, m_u, σ
 	const amu, k = m_u, k_B
 end;
@@ -564,7 +566,7 @@ end;
 
 # ╔═╡ 3833772c-d63f-11ea-09b5-f36d68e512ea
 begin
-	results, results_inputs = [], []
+	results, results_inputs = Derived[], Derived_inputs[]
 	for st in studies
 		# Calculate parameters
 		params, params_inputs = calculate_params(st)
@@ -584,30 +586,32 @@ function display_summary(d::Derived, d_i::Derived_inputs)
 	md"""
 	###### **$(d.name):**
 	**Star Params** \
-	$(d_i.inputs_Rₛ) = $(rnd((uconvert(u"Rsun", d.Rₛ)))) \
-	$(d_i.inputs_Mₛ) = $(rnd((uconvert(u"Msun", d.Mₛ)))) \
-	$(d_i.inputs_Tₛ) = $(rnd((uconvert(u"K", d.Tₛ)))) \
-	$(d_i.inputs_Lₛ) = $(rnd((uconvert(u"Lsun", d.Lₛ)))) \
-	$(d_i.inputs_ρₛ) = $(rnd((uconvert(u"g/cm^3", d.ρₛ)))) \
-	$(d_i.inputs_gₛ)(cm/s²) = $(log10(ustrip(uconvert(u"cm/s^2", d.gₛ))))
+	$(d_i.inputs_Rₛ) = $(rnd(d.Rₛ |> u"Rsun")) \
+	$(d_i.inputs_Rₛ) = $(rnd(d.Rₛ |> u"Rsun")) \
+	$(d_i.inputs_Mₛ) = $(rnd(d.Mₛ |> u"Msun")) \
+	$(d_i.inputs_Tₛ) = $(rnd(d.Tₛ |> u"K")) \
+	$(d_i.inputs_Lₛ) = $(rnd(d.Lₛ |> u"Lsun")) \
+	$(d_i.inputs_ρₛ) = $(rnd(d.ρₛ |> u"g/cm^3")) \
+	$(d_i.inputs_gₛ)(cm/s²) = $(log10(ustrip(d.gₛ |> u"cm/s^2")))
 	
 	**Orbital params** \
-	$(d_i.inputs_K) = $(rnd((uconvert(u"m/s", d.K)))) \
-	$(d_i.inputs_i) = $(rnd((uconvert(u"°", d.i)))) \
-	$(d_i.inputs_RₚRₛ) = $(uconvert(NoUnits, d.RₚRₛ)) \
-	$(d_i.inputs_aRₛ) = $(uconvert(NoUnits, d.aRₛ)) \
-	$(d_i.inputs_P) = $(rnd((uconvert(u"d", d.P)))) \
+	$(d_i.inputs_K) = $(rnd(d.K |> u"m/s")) \
+	$(d_i.inputs_i) = $(rnd(d.i |> u"°")) \
+	$(d_i.inputs_RₚRₛ) = $(NoUnits, d.RₚRₛ) \
+	$(d_i.inputs_aRₛ) = $(NoUnits, d.aRₛ) \
+	$(d_i.inputs_P) = $(rnd(d.P |> u"d")) \
 	$(d_i.inputs_b) = $(d.b)
 
 	**Planet params** \
-	$(d_i.inputs_μ) = $(uconvert(u"u", d.μ)) \
-	$(d_i.inputs_α) = $(uconvert(NoUnits, d.α)) \
-	$(d_i.inputs_Rₚ) = $(rnd((uconvert(u"Rjup", d.Rₚ)))) \
-	$(d_i.inputs_Mₚ) = $(rnd((uconvert(u"Mjup", d.Mₚ)))) \
-	$(d_i.inputs_ρₚ) = $(rnd(uconvert(u"g/cm^3", d.ρₚ)))) \
-	$(d_i.inputs_Tₚ) = $(rnd(uconvert(u"K", d.Tₚ)))) \
-	$(d_i.inputs_gₚ) = $(rnd((uconvert(u"m/s^2", d.gₚ)))) \
-	$(d_i.inputs_H) = $(rnd((uconvert(u"km", d.H))))
+	$(d_i.inputs_μ) = $(d.μ |> u"u") \
+	$(d_i.inputs_α) = $(d.α) \
+	$(d_i.inputs_Rₚ) = $(rnd(d.Rₚ |> u"Rjup")) \
+	$(d_i.inputs_Mₚ) = $(rnd(d.Mₚ |> u"Mjup")) \
+	$(d_i.inputs_ρₚ) = $(rnd(d.ρₚ |> u"g/cm^3")) \
+	$(d_i.inputs_Tₚ) = $(rnd(d.Tₚ |> u"K")) \
+	$(d_i.inputs_gₚ) = $(rnd(d.gₚ |> u"m/s^2")) \
+	$(d_i.inputs_H) = $(rnd(d.H |> u"km"))
+
 
 	**Signal at $(d.N_scales) scale heights** \
 	ΔD = $(d.N_scales * uconvert(NoUnits, d.ΔD) * 1e6) ppm
