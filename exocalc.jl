@@ -7,7 +7,6 @@ using InteractiveUtils
 # ╔═╡ 02bfa078-d62b-11ea-15df-d701431829b9
 begin
 	using Unitful
-	using Unitful: Mass, Length, Time, Temperature, Density, Luminosity, Acceleration, Velocity
 	using Measurements, UnitfulAstro, Parameters, Markdown
 	using PhysicalConstants.CODATA2018: G, k_B, m_u, σ
 	const amu, k = m_u, k_B
@@ -37,46 +36,6 @@ md"### Results"
 # ╔═╡ a35f2936-e41d-11ea-3bdc-3b347410a558
 md"Scroll to see more results"
 
-# ╔═╡ 1fcc6fd2-34e7-11eb-09b4-e7856d474636
-uconvert(NoUnits, (1.06404u"Rjup"/0.96u"Rsun"))
-
-# ╔═╡ b162c4ec-34e6-11eb-27c1-1f016197d373
-uconvert(NoUnits, (1.278u"Rjup"/1.15u"Rsun"))
-
-# ╔═╡ b811deb4-3438-11eb-1eab-71f75a161537
-md"### Change in equilibrium temperature investigation"
-
-# ╔═╡ f80ed4c0-3433-11eb-388b-b19aba4e2d93
-md"""
-```math
-\begin{align}
-T_\text{eq}
-	&= T_\star\sqrt{\frac{R_\star}{2a}}(1 - \alpha)^{1/4}\quad, \\
-\Delta T_\text{eq}
-	&\equiv T_\text{eq}^{(2)} - T_\text{eq}^{(1)} \\
-	&= T_\text{eq}^{(1)}
-		\left(\frac{T_\text{eq}^{(2)}}{T_\text{eq}^{(1)}} - 1\right) \\
-	&= T_\text{eq}^{(1)}\left(
-		\frac{T_\star^{(2)}}{T_\star^{(1)}}
-		\sqrt{\frac{R_\star^{(2)}}{R_\star^{(1)}}} - 1
-	\right)
-\end{align}
-```
-"""
-
-# ╔═╡ 62f44e74-3435-11eb-321d-7d11235a6637
-ΔTeq(;Teq₁, Rstar₁, Tstar₁, Rstar₂, Tstar₂) = 
-	Teq₁*((Tstar₂/Tstar₁)*√(Rstar₂/Rstar₁) - 1.0)
-
-# ╔═╡ f5ff1990-3435-11eb-0798-bd18fd65de2c
-ΔTeq(
-	Teq₁ = 2016.0,
-	Rstar₁ = 0.96,
-	Tstar₁ = 5905.0,
-	Rstar₂ = 1.15176,
-	Tstar₂ = 5918.23,
-)
-
 # ╔═╡ 38a61304-e0fe-11ea-14b2-17d9b9e13c7b
 md"### Calculate parameters"
 
@@ -94,7 +53,7 @@ For transparency, the inputs used for each calculation are shown in parenthesis 
 
 # ╔═╡ 49f75dea-dda0-11ea-1a85-bbdd4750b878
 md"""
-These are the functions used to calculate each parameter based on the combination of inputs given. No `if` statements or default "`None`" keyword arguments needed thanks to Julia's multiple dispatch! For convenience, these functions also return a string on the inputs used.
+These are the functions used to calculate each parameter based on the combination of inputs given. No `if` statements or default "`None`" keyword arguments needed thanks to Julia's multiple dispatch! For ease of reference, these functions also return a string of the inputs used.
 """
 
 # ╔═╡ 3f79c516-da77-11ea-1f6b-d3e7191a95d8
@@ -106,38 +65,41 @@ begin
 	get_RₚRₛ(Rₚ, Rₛ) = Rₚ / Rₛ, "RₚRₛ(Rₚ, Rₛ)"
 
 	# Semi-major axis / Star density
-	get_aRₛ(ρₛ::Unitful.Density, P::Unitful.Time) =
-		((G * P^2 * ρₛ)/(3.0π))^(1//3), "aRₛ(ρₛ, P)"
+	function get_aRₛ(ρₛ::Unitful.Density, P::Unitful.Time)
+		return ((G * P^2 * ρₛ)/(3.0π))^(1//3), "aRₛ(ρₛ, P)"
+	end
 	get_aRₛ(a::Unitful.Length, Rₛ::Unitful.Length) = a / Rₛ, "aRₛ(a, Rₛ)"
-	
+
 	# Semi-major axis
     get_a(aRₛ, Rₛ) = aRₛ * Rₛ, "a(aRₛ, Rₛ)"
-	
+
 	# Impact parameter
 	get_b(i, aRₛ) = aRₛ * cos(i), "b(i, aRₛ)"
 
 	# Star density
-	get_ρₛ(P::Unitful.Time, aRₛ::Measurement) =
-        (3.0π / (G * P^2)) * aRₛ^3, "ρₛ(P, aRₛ)"
-	get_ρₛ(Mₛ::Unitful.Mass, Rₛ::Unitful.Length) =
-		Mₛ / ((4.0/3.0)π * Rₛ^3), "ρₛ(Mₛ, Rₛ)"
+	function get_ρₛ(P::Unitful.Time, aRₛ::Measurement)
+        return (3.0π / (G * P^2)) * aRₛ^3, "ρₛ(P, aRₛ)"
+	end
+	function get_ρₛ(Mₛ::Unitful.Mass, Rₛ::Unitful.Length)
+		return Mₛ / ((4.0/3.0)π * Rₛ^3), "ρₛ(Mₛ, Rₛ)"
+	end
 
 	# Star mass
 	get_Mₛ(ρₛ, Rₛ) = ρₛ * (4.0/3.0) * π * Rₛ^3.0, "Mₛ(ρₛ, Rₛ)"
 
 	# Star luminosity
 	get_Lₛ(Tₛ, Rₛ) = 4.0π * Rₛ^2 * σ * Tₛ^4, "Lₛ(Tₛ, Rₛ)"
-	
+
 	# Star temperature 
 	get_Tₛ(Lₛ, Rₛ) = (L / (4.0π * Rₛ^2 * σ))^(1//4), "Tₛ(Lₛ, Rₛ)"
 
 	# Planet mass
 	get_Mₚ(K, i, P, Mₛ) =
 		(K/sin(i)) * (P / (2.0π*G))^(1//3) * Mₛ^(2//3), "Mₚ(K, i, P, Mₛ)"
-	
+
 	# Planet radius
 	get_Rₚ(RₚRₛ, Rₛ) =  RₚRₛ * Rₛ, "Rₚ(RₚRₛ, Rₛ)"
-	
+
 	# Planet density
 	get_ρₚ(Mₚ, Rₚ) = Mₚ / ((4.0/3.0)π * Rₚ^3), "ρₚ(Mₚ, Rₚ)"
 
@@ -157,24 +119,14 @@ begin
 	get_ΔD(H, RₚRₛ, Rₛ) = 2.0 * H * RₚRₛ/Rₛ
 end;
 
-# ╔═╡ c5c5ea28-dd9e-11ea-1f89-5b1371831177
-md"### Function displaying the results"
-
-# ╔═╡ 33d8501e-2445-11eb-2c79-35db13d2dd8e
-function rnd(x; d=5, u=unit(x))
-	val = round(u, Measurements.value(x); digits=d)
-	unc = round(u, Measurements.uncertainty(x); digits=d)
-	"$(ustrip(val)) ± $unc"
-end
-
 # ╔═╡ 8e5811ae-dd9e-11ea-127e-b9812511492b
-md"### Structure holding input parameters used for a study"
+md"### Input parameters from study"
 
 # ╔═╡ db28dbd2-db12-11ea-28e4-2b6cf30bd102
 @with_kw_noshow struct Study @deftype Union{Nothing, Quantity, Measurement}
 	# Reference name (e.g. Ciceri et al. 2015)
 	name::String = "Custom"
-	
+
 	# Star params
 	Tₛ = nothing
 	ρₛ = nothing
@@ -288,13 +240,13 @@ studies = [
 	),
 	Study(
 		name = "HAT-P-23/b: Set 1 (Gaia DR1)",
-		
+
 		# Weaver et al. (2020)
 		i	 = (83.6 ± 0.3)u"°",
 		P	 = (1.21289 ± 3.73975e-8)u"d",
 		RₚRₛ = 0.11390 ± 0.0010,
 		#ρₛ = (1.016 ± 0.0286)u"g/cm^3",
-			
+
 		# Literature/Fixed parameter inputs
 		μ	 = 2.0*amu,
 		α	 = 0.0 ± 0.0,
@@ -305,13 +257,13 @@ studies = [
 	),
 	Study(
 		name = "HAT-P-23/b: Set 2 (TICv8)",
-		
+
 		# Weaver et al. (2020)
 		i	 = (83.6 ± 0.3)u"°",
 		P	 = (1.21289 ± 3.73975e-8)u"d",
 		RₚRₛ = 0.11390 ± 0.0010,
 		#ρₛ   = (1.016 ± 0.0286)u"g/cm^3",
-		
+
 		# Literature/Fixed parameter inputs
 		μ	 = 2.0*amu,
 		α	 = 0.0 ± 0.0,
@@ -319,9 +271,49 @@ studies = [
 		Tₛ	 = (5918.230 ± 136.811)u"K", # TICv8 (DR2)
 		Rₛ	 = (1.1517600 ± 0.0596583)u"Rsun", # TICv8 (DR2)
 		ρₛ   = (0.99471000 ± 0.23240140)u"g/cm^3", # TICv8 (DR2)
-		
+
 	),
 ];
+
+# ╔═╡ a8df7ad0-dd9e-11ea-2a6a-f16683371016
+md"### Derived parameters"
+
+# ╔═╡ bd752a9e-dd80-11ea-141c-779c5135d4d8
+@with_kw_noshow struct Derived @deftype Tuple{Union{Nothing, Quantity, Measurement}, String}
+	# Reference name (e.g. Ciceri et al. 2015)
+	name::String = "Custom"
+
+	# Star Params
+	ρₛ
+	gₛ
+	Mₛ
+	Rₛ
+	Tₛ
+	Lₛ
+
+	#Orbital params
+	RₚRₛ::Tuple{Measurement, String}
+	P
+	aRₛ::Tuple{Measurement, String}
+	a
+	b::Tuple{Measurement, String}
+	K
+	i
+
+	# Planet params
+	μ
+	α::Tuple{Measurement, String}
+	gₚ
+	Mₚ
+	Rₚ
+	ρₚ
+	Tₚ
+	H
+
+	# Signal
+	N_scales::Float64
+	ΔD::Measurement
+end;
 
 # ╔═╡ c01eb856-e0f9-11ea-01d5-07593189ce46
 function calculate_params(st::Study)
@@ -416,201 +408,85 @@ function calculate_params(st::Study)
 	μ, inputs_μ = 
 	!isnothing(st.μ) ? (st.μ, "μ(μ)") :
 	error("Must provide mean molecula weight (μ).")
-	
+
 	# Calculate signal
 	H, inputs_H  = get_H(μ, Tₚ, gₚ)
 	ΔD = get_ΔD(H, RₚRₛ, Rₛ)
-	
+
 	# Store results
-	params = (
+	return Derived(
+		# Study
+		name = st.name,
+
 		# Star Params
-		ρₛ	 = ρₛ,
-		gₛ	 = gₛ,
-		Mₛ	 = Mₛ,
-		Rₛ	 = Rₛ,
-		Tₛ	 = Tₛ,
-		Lₛ   = Lₛ,
+		ρₛ = (ρₛ, inputs_ρₛ),
+		gₛ = (gₛ, inputs_gₛ),
+		Mₛ = (Mₛ, inputs_Mₛ),
+		Rₛ = (Rₛ, inputs_Rₛ),
+		Tₛ = (Tₛ, inputs_Tₛ),
+		Lₛ = (Lₛ, inputs_Lₛ),
 
 		#Orbital params
-		RₚRₛ = RₚRₛ,
-		P	 = P,
-		aRₛ  = aRₛ,
-		a    = a,
-		K	 = K,
-		i	 = i,
-		b    = b,
+		RₚRₛ = (RₚRₛ, inputs_RₚRₛ),
+		P = (P, inputs_P),
+		aRₛ = (aRₛ, inputs_aRₛ),
+		a = (a, inputs_a),
+		b = (b, inputs_b),
+		K = (K, inputs_K),
+		i = (i, inputs_i),
 
 		# Planet params
-		μ	 = μ,
-		α	 = α,
-		gₚ	 = gₚ,
-		Mₚ	 = Mₚ,
-		Rₚ	 = Rₚ,
-		ρₚ   = ρₚ,
-		Tₚ	 = Tₚ,
-		H	 = H,
+		μ = (μ, inputs_μ),
+		α = (α, inputs_α),
+		gₚ = (gₚ, inputs_gₚ),
+		Mₚ = (Mₚ, inputs_Mₚ),
+		Rₚ = (Rₚ, inputs_Rₚ),
+		ρₚ = (ρₚ, inputs_ρₚ),
+		Tₚ = (Tₚ, inputs_Tₚ),
+		H = (H, inputs_H),
 
 		# Signal
 		N_scales = st.N_scales,
-		ΔD	= ΔD,
+		ΔD = ΔD,
 	)
-	
-	# Store inputs used
-	params_inputs = (
-		# Star Params
-		inputs_ρₛ   = inputs_ρₛ,
-		inputs_gₛ   = inputs_gₛ,
-		inputs_Mₛ   = inputs_Mₛ,
-		inputs_Rₛ   = inputs_Rₛ,
-		inputs_Tₛ   = inputs_Tₛ,
-		inputs_Lₛ   = inputs_Lₛ,
-
-		#Orbital params
-		inputs_RₚRₛ = inputs_RₚRₛ,
-		inputs_P    = inputs_P,
-		inputs_aRₛ  = inputs_aRₛ,
-		inputs_a    = inputs_a,
-		inputs_K    = inputs_K,
-		inputs_i    = inputs_i,
-		inputs_b    = inputs_b,
-
-		# Planet params
-		inputs_μ    = inputs_μ,
-		inputs_α    = inputs_α,
-		inputs_gₚ   = inputs_gₚ,
-		inputs_Mₚ   = inputs_Mₚ,
-		inputs_Rₚ   = inputs_Rₚ,
-		inputs_ρₚ   = inputs_ρₚ,
-		inputs_Tₚ   = inputs_Tₚ,
-		inputs_H    = inputs_H,
-	)
-	
-	return params, params_inputs;
-end;
-
-# ╔═╡ a8df7ad0-dd9e-11ea-2a6a-f16683371016
-md"### Structure holding summary of all parameters"
-
-# ╔═╡ bd752a9e-dd80-11ea-141c-779c5135d4d8
-@with_kw_noshow struct Derived @deftype Quantity
-	# Reference name (e.g. Ciceri et al. 2015)
-	name::String = "Custom"
-	
-	# Star Params
-	ρₛ
-	gₛ
-	Mₛ
-	Rₛ
-	Tₛ
-	Lₛ
-
-	#Orbital params
-	RₚRₛ::Measurement
-	P
-	aRₛ::Measurement
-	a
-	b::Measurement
-	K
-	i
-
-	# Planet params
-	μ
-	α::Measurement
-	gₚ
-	Mₚ
-	Rₚ
-	ρₚ
-	Tₚ
-	H
-
-	# Signal
-	N_scales::Float64
-	ΔD
-end;
-
-# ╔═╡ 855e7c4c-e0fe-11ea-1bbb-1b9db42a984d
-md"### Structure holding inputs used in each calculation"
-
-# ╔═╡ 410f5804-e0ef-11ea-0576-e1692cd42b1b
-@with_kw_noshow struct Derived_inputs @deftype String
-	# Reference name (e.g. Ciceri et al. 2015)
-	name = "Custom"
-	
-	# Star Params
-	inputs_ρₛ
-	inputs_gₛ
-	inputs_Mₛ
-	inputs_Rₛ
-	inputs_Tₛ
-	inputs_Lₛ
-	
-	#Orbital params
-	inputs_RₚRₛ
-	inputs_P
-	inputs_aRₛ
-	inputs_a
-	inputs_b
-	inputs_K
-	inputs_i
-	
-	# Planet params
-	inputs_μ
-	inputs_α
-	inputs_gₚ
-	inputs_Mₚ
-	inputs_Rₚ
-	inputs_ρₚ
-	inputs_Tₚ
-	inputs_H
 end;
 
 # ╔═╡ 3833772c-d63f-11ea-09b5-f36d68e512ea
-begin
-	results, results_inputs = Derived[], Derived_inputs[]
-	for st in studies
-		# Calculate parameters
-		params, params_inputs = calculate_params(st)
-		
-		# Store summary
-		summary = Derived(; name=st.name, params...)
-		push!(results, summary)
-		
-		# Store summary inputs
-		summary_inputs = Derived_inputs(; name=st.name, params_inputs...)
-		push!(results_inputs, summary_inputs)
-	end
-end;
+results = Derived[calculate_params(st) for st in studies];
+
+# ╔═╡ c5c5ea28-dd9e-11ea-1f89-5b1371831177
+md"### Display final results"
 
 # ╔═╡ 33fc58d0-dbd9-11ea-3c45-83f4b5a2a818
-function display_summary(d::Derived, d_i::Derived_inputs)
+function display_summary(d::Derived)
 	md"""
 	###### **$(d.name):**
 	**Star Params** \
-	$(d_i.inputs_Rₛ) = $(rnd(d.Rₛ |> u"Rsun")) \
-	$(d_i.inputs_Rₛ) = $(rnd(d.Rₛ |> u"Rsun")) \
-	$(d_i.inputs_Mₛ) = $(rnd(d.Mₛ |> u"Msun")) \
-	$(d_i.inputs_Tₛ) = $(rnd(d.Tₛ |> u"K")) \
-	$(d_i.inputs_Lₛ) = $(rnd(d.Lₛ |> u"Lsun")) \
-	$(d_i.inputs_ρₛ) = $(rnd(d.ρₛ |> u"g/cm^3")) \
-	$(d_i.inputs_gₛ)(cm/s²) = $(log10(ustrip(d.gₛ |> u"cm/s^2")))
-	
+	$(d.Rₛ[2]) = $(d.Rₛ[1] |> u"Rsun") \
+	$(d.Rₛ[2]) = $(d.Rₛ[1] |> u"Rsun") \
+	$(d.Mₛ[2]) = $(d.Mₛ[1] |> u"Msun") \
+	$(d.Tₛ[2]) = $(d.Tₛ[1] |> u"K") \
+	$(d.Lₛ[2]) = $(d.Lₛ[1] |> u"Lsun") \
+	$(d.ρₛ[2]) = $(d.ρₛ[1] |> u"g/cm^3") \
+	$(d.gₛ[2])(cm/s²) = $(log10(ustrip(d.gₛ[1] |> u"cm/s^2")))
+
 	**Orbital params** \
-	$(d_i.inputs_K) = $(rnd(d.K |> u"m/s")) \
-	$(d_i.inputs_i) = $(rnd(d.i |> u"°")) \
-	$(d_i.inputs_RₚRₛ) = $(NoUnits, d.RₚRₛ) \
-	$(d_i.inputs_aRₛ) = $(NoUnits, d.aRₛ) \
-	$(d_i.inputs_P) = $(rnd(d.P |> u"d")) \
-	$(d_i.inputs_b) = $(d.b)
+	$(d.K[2]) = $(d.K[1] |> u"m/s") \
+	$(d.i[2]) = $(d.i[1] |> u"°") \
+	$(d.RₚRₛ[2]) = $(NoUnits, d.RₚRₛ) \
+	$(d.aRₛ[2]) = $(NoUnits, d.aRₛ) \
+	$(d.P[2]) = $(d.P[1] |> u"d") \
+	$(d.b[2]) = $(d.b)
 
 	**Planet params** \
-	$(d_i.inputs_μ) = $(d.μ |> u"u") \
-	$(d_i.inputs_α) = $(d.α) \
-	$(d_i.inputs_Rₚ) = $(rnd(d.Rₚ |> u"Rjup")) \
-	$(d_i.inputs_Mₚ) = $(rnd(d.Mₚ |> u"Mjup")) \
-	$(d_i.inputs_ρₚ) = $(rnd(d.ρₚ |> u"g/cm^3")) \
-	$(d_i.inputs_Tₚ) = $(rnd(d.Tₚ |> u"K")) \
-	$(d_i.inputs_gₚ) = $(rnd(d.gₚ |> u"m/s^2")) \
-	$(d_i.inputs_H) = $(rnd(d.H |> u"km"))
+	$(d.μ[2]) = $(d.μ[1] |> u"u") \
+	$(d.α[2]) = $(d.α[1]) \
+	$(d.Rₚ[2]) = $(d.Rₚ[1] |> u"Rjup") \
+	$(d.Mₚ[2]) = $(d.Mₚ[1] |> u"Mjup") \
+	$(d.ρₚ[2]) = $(d.ρₚ[1] |> u"g/cm^3") \
+	$(d.Tₚ[2]) = $(d.Tₚ[1] |> u"K") \
+	$(d.gₚ[2]) = $(d.gₚ[1] |> u"m/s^2") \
+	$(d.H[2]) = $(d.H[1] |> u"km")
 
 
 	**Signal at $(d.N_scales) scale heights** \
@@ -619,7 +495,7 @@ function display_summary(d::Derived, d_i::Derived_inputs)
 end;
 
 # ╔═╡ 4bfaf322-dbd9-11ea-0449-87d9aa07311f
-display_summary.(results, results_inputs)
+display_summary.(results)
 
 # ╔═╡ 7db94ad6-dda1-11ea-2f33-1da144f1b7ad
 md"Libraries for using things like physical constants and units."
@@ -633,12 +509,6 @@ md"Libraries for using things like physical constants and units."
 # ╟─7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 # ╟─a35f2936-e41d-11ea-3bdc-3b347410a558
 # ╠═4bfaf322-dbd9-11ea-0449-87d9aa07311f
-# ╠═1fcc6fd2-34e7-11eb-09b4-e7856d474636
-# ╠═b162c4ec-34e6-11eb-27c1-1f016197d373
-# ╟─b811deb4-3438-11eb-1eab-71f75a161537
-# ╟─f80ed4c0-3433-11eb-388b-b19aba4e2d93
-# ╟─62f44e74-3435-11eb-321d-7d11235a6637
-# ╠═f5ff1990-3435-11eb-0798-bd18fd65de2c
 # ╟─38a61304-e0fe-11ea-14b2-17d9b9e13c7b
 # ╠═3833772c-d63f-11ea-09b5-f36d68e512ea
 # ╟─0b6821a4-dac3-11ea-27d7-911521f0d3c0
@@ -646,14 +516,11 @@ md"Libraries for using things like physical constants and units."
 # ╠═c01eb856-e0f9-11ea-01d5-07593189ce46
 # ╟─49f75dea-dda0-11ea-1a85-bbdd4750b878
 # ╠═3f79c516-da77-11ea-1f6b-d3e7191a95d8
-# ╟─c5c5ea28-dd9e-11ea-1f89-5b1371831177
-# ╠═33d8501e-2445-11eb-2c79-35db13d2dd8e
-# ╠═33fc58d0-dbd9-11ea-3c45-83f4b5a2a818
 # ╟─8e5811ae-dd9e-11ea-127e-b9812511492b
 # ╠═db28dbd2-db12-11ea-28e4-2b6cf30bd102
 # ╟─a8df7ad0-dd9e-11ea-2a6a-f16683371016
 # ╠═bd752a9e-dd80-11ea-141c-779c5135d4d8
-# ╟─855e7c4c-e0fe-11ea-1bbb-1b9db42a984d
-# ╠═410f5804-e0ef-11ea-0576-e1692cd42b1b
+# ╟─c5c5ea28-dd9e-11ea-1f89-5b1371831177
+# ╠═33fc58d0-dbd9-11ea-3c45-83f4b5a2a818
 # ╟─7db94ad6-dda1-11ea-2f33-1da144f1b7ad
 # ╠═02bfa078-d62b-11ea-15df-d701431829b9
