@@ -7,7 +7,7 @@ using InteractiveUtils
 # ╔═╡ 02bfa078-d62b-11ea-15df-d701431829b9
 begin
 	using Unitful
-	using Measurements, UnitfulAstro, Parameters, Markdown
+	using Measurements, UnitfulAstro, Parameters, Markdown, StructArrays
 	using PhysicalConstants.CODATA2018: G, k_B, m_u, σ
 	const amu, k = m_u, k_B
 end;
@@ -34,7 +34,7 @@ md"Reference values from [NASA Exoplanet Archive](https://exoplanetarchive.ipac.
 md"### Results"
 
 # ╔═╡ a35f2936-e41d-11ea-3bdc-3b347410a558
-md"Scroll to see more results"
+md"Scroll to see more:"
 
 # ╔═╡ 38a61304-e0fe-11ea-14b2-17d9b9e13c7b
 md"### Calculate parameters"
@@ -451,8 +451,8 @@ function calculate_params(st::Study)
 	)
 end;
 
-# ╔═╡ 3833772c-d63f-11ea-09b5-f36d68e512ea
-results = Derived[calculate_params(st) for st in studies];
+# ╔═╡ a5a123d6-c0e7-4542-a231-6c50970d1470
+const results = StructArray(Derived[calculate_params(st) for st in studies]);
 
 # ╔═╡ c5c5ea28-dd9e-11ea-1f89-5b1371831177
 md"### Display final results"
@@ -494,7 +494,7 @@ function display_summary(d::Derived)
 	"""
 end;
 
-# ╔═╡ 4bfaf322-dbd9-11ea-0449-87d9aa07311f
+# ╔═╡ 6836afe2-6846-4582-8afd-c3d3a1e832ba
 display_summary.(results)
 
 # ╔═╡ 7db94ad6-dda1-11ea-2f33-1da144f1b7ad
@@ -508,9 +508,9 @@ md"Libraries for using things like physical constants and units."
 # ╠═17302d74-d63b-11ea-3de3-49f0df0554ca
 # ╟─7cff6dfc-dd9f-11ea-1fdf-7b6aaa9435b4
 # ╟─a35f2936-e41d-11ea-3bdc-3b347410a558
-# ╠═4bfaf322-dbd9-11ea-0449-87d9aa07311f
+# ╠═6836afe2-6846-4582-8afd-c3d3a1e832ba
 # ╟─38a61304-e0fe-11ea-14b2-17d9b9e13c7b
-# ╠═3833772c-d63f-11ea-09b5-f36d68e512ea
+# ╠═a5a123d6-c0e7-4542-a231-6c50970d1470
 # ╟─0b6821a4-dac3-11ea-27d7-911521f0d3c0
 # ╟─f8281da6-dd9f-11ea-1b6c-d32702215397
 # ╠═c01eb856-e0f9-11ea-01d5-07593189ce46
