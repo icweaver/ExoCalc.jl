@@ -486,6 +486,7 @@ function display_summary(d::Derived)
 	$(d.ρₚ[2]) = $(d.ρₚ[1] |> u"g/cm^3") \
 	$(d.Tₚ[2]) = $(d.Tₚ[1] |> u"K") \
 	$(d.gₚ[2]) = $(d.gₚ[1] |> u"m/s^2") \
+	log10 g (cm/s^2) = $(d.gₚ[1] |> u"cm/s^2" |> ustrip |> log10) \
 	$(d.H[2]) = $(d.H[1] |> u"km")
 
 
