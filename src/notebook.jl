@@ -276,6 +276,31 @@ studies = [
 		ρₛ   = (0.99471000 ± 0.23240140)u"g/cm^3", # TICv8 (DR2)
 
 	),
+	Study(
+		name = "WASP-50b: Chakrabarty & Sengupta (2019)",
+		i	 = (84.88 ± 0.27)u"°",
+		P	 = (1.955100 ± 0.000005)u"d",
+		RₚRₛ = 0.1390 ± 0.0006,
+		μ	 = 2.0*amu,
+		α	 = 0.0 ± 0.0,
+		K	 = (256.6 ± 4.4)u"m/s",
+		Tₛ	 = (5400 ± 100)u"K",
+		Rₛ	 = (0.843 ± 0.031)u"Rsun",
+		aRₛ  = 7.51 ± 0.10,
+	),
+	Study(
+		name = "WASP-50b: C&S 2019 + TICv8",
+		i	 = (84.88 ± 0.27)u"°",
+		P	 = (1.955100 ± 0.000005)u"d",
+		RₚRₛ = 0.1390 ± 0.0006,
+		μ	 = 2.0*amu,
+		α	 = 0.0 ± 0.0,
+		K	 = (256.6 ± 4.4)u"m/s",
+		Tₛ	 = (5518.0000 ± 128.3340)u"K", # TICv8
+		Rₛ	 = (0.8734180 ± 0.0453186)u"Rsun", # TICv8
+		ρₛ   = (2.0503245 + 0.4676309)u"g/cm^3", # TICv8 (not self consistent)
+		#Mₛ   = (0.96900000 ± 0.14486300)u"Msun", # TICv8
+	),
 ];
 
 # ╔═╡ a8df7ad0-dd9e-11ea-2a6a-f16683371016
@@ -383,14 +408,17 @@ function calculate_params(st::Study)
 	elseif !isnothing(st.a)
 		a, inputs_a = st.a, "a(a)"
 		aRₛ, inputs_aRₛ = get_aRₛ(a, Rₛ)
-		ρₛ, inputs_ρₛ = get_ρₛ(P, aRₛ)
-	else
-		error("ρₛ or (aRₛ or a) must be given for $(st.name)")
+		ρₛ, inputs_ρₛ = get_ρₛ(P, aRₛ)		
+	# else
+	# 	error("ρₛ or (aRₛ or a, or Mₛ) must be given for $(st.name)")
 	end
 
 	# Mₛ
 	if !isnothing(st.Mₛ)
 		Mₛ, inputs_Mₛ = st.Mₛ, "Mₛ(Mₛ)"
+		ρₛ, inputs_ρₛ = get_ρₛ(Mₛ, Rₛ)
+		aRₛ, inputs_aRₛ = get_aRₛ(ρₛ, P)
+		a, inputs_a = get_a(aRₛ, Rₛ)
 	else
 		Mₛ, inputs_Mₛ = get_Mₛ(ρₛ, Rₛ)
 	end
@@ -465,7 +493,6 @@ function display_summary(d::Derived)
 	md"""
 	###### **$(d.name):**
 	**Star Params** \
-	$(d.Rₛ[2]) = $(d.Rₛ[1] |> u"Rsun") \
 	$(d.Rₛ[2]) = $(d.Rₛ[1] |> u"Rsun") \
 	$(d.Mₛ[2]) = $(d.Mₛ[1] |> u"Msun") \
 	$(d.Tₛ[2]) = $(d.Tₛ[1] |> u"K") \
