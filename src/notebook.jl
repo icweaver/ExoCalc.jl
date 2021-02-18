@@ -1,13 +1,16 @@
 ### A Pluto.jl notebook ###
-# v0.12.18
+# v0.12.20
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 02bfa078-d62b-11ea-15df-d701431829b9
 begin
+	using Pkg
+	Pkg.activate("..")
+	Pkg.instantiate()
 	using Unitful
-	using Measurements, UnitfulAstro, Parameters, Markdown, StructArrays
+	using Measurements, UnitfulAstro, Parameters, Markdown
 	using PhysicalConstants.CODATA2018: G, k_B, m_u, σ
 	const amu, k = m_u, k_B
 end;
@@ -452,7 +455,7 @@ function calculate_params(st::Study)
 end;
 
 # ╔═╡ a5a123d6-c0e7-4542-a231-6c50970d1470
-const results = StructArray(Derived[calculate_params(st) for st in studies]);
+const results = Derived[calculate_params(st) for st in studies]
 
 # ╔═╡ c5c5ea28-dd9e-11ea-1f89-5b1371831177
 md"### Display final results"
