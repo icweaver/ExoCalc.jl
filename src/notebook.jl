@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.20
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -298,8 +298,21 @@ studies = [
 		K	 = (256.6 ± 4.4)u"m/s",
 		Tₛ	 = (5518.0000 ± 128.3340)u"K", # TICv8
 		Rₛ	 = (0.8734180 ± 0.0453186)u"Rsun", # TICv8
-		ρₛ   = (2.0503245 + 0.4676309)u"g/cm^3", # TICv8 (not self consistent)
+		ρₛ   = (2.0503245 ± 0.4676309)u"g/cm^3", # TICv8 (not self consistent)
 		#Mₛ   = (0.96900000 ± 0.14486300)u"Msun", # TICv8
+	),
+	Study(
+		name = "WASP-50b: TESS multi-sector + TICv8",
+		i	 = (84.5157 ± 0.207)u"°",
+		P	 = (1.9550931258 ± 3.963e-7)u"d",
+		RₚRₛ = 0.1370858217 ± 0.0013727689,
+		μ	 = 2.0*amu,
+		α	 = 0.0 ± 0.0,
+		K	 = (256.6 ± 4.4)u"m/s", # C&S 2019
+		Tₛ	 = (5518.0000 ± 128.3340)u"K", # TICv8
+		Rₛ	 = (0.8734180 ± 0.0453186)u"Rsun", # TICv8
+		ρₛ   = (2.0503245 ± 0.4676309)u"g/cm^3", # TICv8
+		#aRₛ  = 7.3624634217 ± 0.10479750132
 	),
 ];
 
@@ -503,10 +516,10 @@ function display_summary(d::Derived)
 	**Orbital params** \
 	$(d.K[2]) = $(d.K[1] |> u"m/s") \
 	$(d.i[2]) = $(d.i[1] |> u"°") \
-	$(d.RₚRₛ[2]) = $(NoUnits, d.RₚRₛ) \
-	$(d.aRₛ[2]) = $(NoUnits, d.aRₛ) \
+	$(d.RₚRₛ[2]) = $(d.RₚRₛ[1] |> NoUnits) \
+	$(d.aRₛ[2]) = $(d.aRₛ[1] |> NoUnits) \
 	$(d.P[2]) = $(d.P[1] |> u"d") \
-	$(d.b[2]) = $(d.b)
+	$(d.b[2]) = $(d.b[1] |> NoUnits)
 
 	**Planet params** \
 	$(d.μ[2]) = $(d.μ[1] |> u"u") \
